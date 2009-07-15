@@ -1,4 +1,14 @@
 <?php
+/*
+
+    Speedy Smilies
+    Copyright 2009 Nick Venturella
+
+    Speedy Smilies is free software licensed under the GNU GPL version 3.
+    See the plugin's main file, speedy-smilies.php, for full details.
+
+*/
+
 
 // List the smilie sets. This should be automated, but for now we are just hard coding the different sets
 function q_smilies_list_sets() {

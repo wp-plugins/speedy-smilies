@@ -11,6 +11,8 @@ Speeds up and beautifies your blog by substituting the individually-wrapped Word
 == Description ==
 Speedy Smilies takes emoticons in WordPress to the next level (where it should be already and hopefully one day will). The end goal is to make smilies load faster in the browser for visitors and make them easy to insert into posts/pages for authors.
 
+Speedy Smilies is free software licensed under the GNU GPL version 3.
+
 == Installation ==
 
 1. Extract `speedy-smilies.zip` and upload the resulting `speedy-smilies` directory to `wp-content/plugins/speedy-smilies`. The plugin directory must be named `speedy-smilies`.
