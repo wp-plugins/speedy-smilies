@@ -1,12 +1,30 @@
 <?php
 
+// Load WordPress base
 require('../../../wp-blog-header.php'); 
-
-$css = file_get_contents(get_stylesheet_directory() . "/style.css");
+$cssfile = get_stylesheet_directory() . "/style.css";
+$css = file_get_contents($cssfile);
 $directory = get_stylesheet_directory_uri();
+
+// Rewrite relative URLs
 $css = preg_replace('!url\(\s?\'?"?(.+?)\'?"?\s?\)!', "url(\\1)", $css);
 $css = preg_replace('!url\(([^/].+?)\)!', "url($directory/\\1)", $css);
 
+// Add Speedy Smilies CSS
+$css .= ".wp-smiley { background-image: url($q_smilies_src); background-repeat: no-repeat; vertical-align: text-top; padding: 0; border: none; height: {$q_smilies_height}px; width: {$q_smilies_width}px }";
+foreach (array_unique($q_smilies_positions) as $smiley => $position) $css .= ".wp-smiley.smiley-$position { background-position: " . ($position - 1) * $q_smilies_width * -1 . "px }";
+
+// Compress CSS
+$css = preg_replace('!/\*.+?\*/!s', "", $css);
+$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
+$css = preg_replace('!;}!', "}", $css);
+$css = preg_replace('![\r\n]!', "", $css);
+$css = preg_replace('!\s+!', " ", $css);
+$css = preg_replace('!([: ])0(px|em|%)!', "\${1}0", $css);
+$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \1 \1!iU', "$1", $css);
+$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
+$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
+
+// Output
 header("Content-Type: text/css");
-print "$css\r\n\r\n/* Added by Speedy Smilies plugin */\r\n.wp-smiley { background-image: url($q_smilies_src); background-repeat: no-repeat; vertical-align: text-top; padding: 0; border: none; height: {$q_smilies_size}px; width: {$q_smilies_size}px; }\r\n";
-foreach (array_unique($q_smilies_positions) as $smiley => $position) print ".wp-smiley.smiley-$position { background-position: " . ($position - 1) * $q_smilies_size * -1 . "px; }\r\n";
+print $css;
