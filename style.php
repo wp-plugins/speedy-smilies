@@ -36,5 +36,10 @@ $css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9
 $css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
 
 // Output
+// To do: Better caching! The style.php file will run on *every* page load. Yikes!
+// Right now, we just cache everything for 10 minutes.
+header("Expires: " . date(DATE_RFC1123, time() + 600));
+header("Cache-Control: max-age=600");
+header("Last-Modified: " . date(DATE_RFC1123, time()));
 header("Content-Type: text/css");
 print $css;

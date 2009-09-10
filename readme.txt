@@ -3,7 +3,7 @@ Contributors: quietmint
 Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smiles, emoticons, emotes, css, css sprite, css sprites, css image sprite, css image sprites, css minification, css compression, css optimization
 Requires at least: 2.8
-Tested up to: 2.8.1
+Tested up to: 2.8.4
 Stable tag: trunk
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
@@ -16,7 +16,8 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 == Installation ==
 
 1. Extract `speedy-smilies.zip` and upload the resulting `speedy-smilies` directory to `wp-content/plugins/speedy-smilies`. The plugin directory must be named `speedy-smilies`.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Activate the plugin through the 'Plugins' section of WordPress.
+1. Configure the plugin using the new 'Speedy Smilies' section under the 'Appearance' section of WordPress.
 
 == Screenshots ==
 
@@ -24,6 +25,10 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 2. An editing pane allows you to insert smilies into posts and pages simply by clicking on them.
 
 == Changelog ==
+
+= 0.4 =
+* Compatible with WordPress 2.8.4
+* Realized that style.php is executing on EVERY page load and wasn't cacheable by browsers. Oops. For the time being, we now cache style.php for 10 minutes.
 
 = 0.3 =
 * Added a basic check for incompatible plugins.
