@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 0.4
+Version: 0.5
 Author URI: http://quietmint.com/
 
 
@@ -81,7 +81,7 @@ function q_smilies_meta_box() {
 
 	foreach (array_unique($q_smilies_positions) as $smiley => $position) {
 		$alt = attribute_escape($smiley);
-		print " <a class='smiley' href='#' onclick='q_smilies_insert(\" $alt \");'><img src='/wp-includes/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /></a> ";
+		print " <a class='smiley' href='#' onclick='q_smilies_insert(\" $alt \");'><img src='" . includes_url() . "/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /></a> ";
 	}
 	print '<div style="clear: both;"></div>';
 }
@@ -98,7 +98,7 @@ function q_smilies_init() {
 	foreach ($q_smilies_positions as $smiley => $position) {
 		$alt = attribute_escape($smiley);
 		$q_smilies_search[] = '/(\s|^)' . preg_quote( $smiley, '/' ) . '(\s|$)/';		
-		$q_smilies_replace[] = " <img src='/wp-includes/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /> ";
+		$q_smilies_replace[] = " <img src='" . includes_url() . "/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /> ";
 	}
 }
 
@@ -120,7 +120,7 @@ function q_smilies_replace($text) {
 	return $output;
 }
 
-function q_smilies_stylesheet_uri($text) { return WP_PLUGIN_URL . "/speedy-smilies/style.php"; }
+function q_smilies_stylesheet_uri($text) { return plugins_url(NULL, __FILE__) . "/style.php"; }
 
 // Disable WordPress default smilies
 remove_action('init', 'smilies_init', 5);
