@@ -230,7 +230,7 @@ function q_smilies_load_set() {
 			);
 			break;
 	}
-	$q_smilies_src = WP_PLUGIN_URL . "/speedy-smilies/$q_smilies_set.png";
+	$q_smilies_src = plugins_url(NULL, __FILE__) . "/$q_smilies_set.png";
 }
 
 

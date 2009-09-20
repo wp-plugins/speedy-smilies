@@ -10,8 +10,19 @@
 */
 
 
-// Load WordPress base
-require('../../../wp-blog-header.php'); 
+// Load WordPress base and print headers.
+// To do: Better caching! The style.php file will run on *every* page load. Yikes!
+// Right now, we just cache everything for 10 minutes.
+require('../../../wp-blog-header.php');
+header("Content-Type: text/css");
+header("Expires: " . date(DATE_RFC1123, time() + 600));
+header("Cache-Control: max-age=600");
+header("Last-Modified: " . date(DATE_RFC1123, time()));
+
+// Stop here if the plugin is disabled
+if (!$q_smilies_src) { print "/* Error: The speedy-smilies plugin is not enabled */"; exit; }
+
+
 $cssfile = get_stylesheet_directory() . "/style.css";
 $css = file_get_contents($cssfile);
 $directory = get_stylesheet_directory_uri();
@@ -35,11 +46,6 @@ $css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \1
 $css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
 $css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
 
-// Output
-// To do: Better caching! The style.php file will run on *every* page load. Yikes!
-// Right now, we just cache everything for 10 minutes.
-header("Expires: " . date(DATE_RFC1123, time() + 600));
-header("Cache-Control: max-age=600");
-header("Last-Modified: " . date(DATE_RFC1123, time()));
-header("Content-Type: text/css");
+// Output and quit
 print $css;
+exit;
