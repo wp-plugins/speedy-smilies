@@ -26,8 +26,14 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 
 == Changelog ==
 
+= 0.6 =
+* Bug fix: For increased security, style.php will not execute when the plugin is disabled.
+
+= 0.5 =
+* Bug fix: The plugin now makes use of the include_url() function instead and will now work properly if you've installed your blog into a subdirectory (e.g., http://yourdomain.com/blog/).
+
 = 0.4 =
-* Compatible with WordPress 2.8.4
+* Compatible with WordPress 2.8.4.
 * Realized that style.php is executing on EVERY page load and wasn't cacheable by browsers. Oops. For the time being, we now cache style.php for 10 minutes.
 
 = 0.3 =
