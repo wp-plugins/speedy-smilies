@@ -22,14 +22,17 @@ header("Last-Modified: " . date(DATE_RFC1123, time()));
 // Stop here if the plugin is disabled
 if (!$q_smilies_src) { print "/* Error: The speedy-smilies plugin is not enabled */"; exit; }
 
+$css = '';
+if (!$_REQUEST['standalone']) {
+	// Load the theme's CSS
+	$cssfile = get_stylesheet_directory() . "/style.css";
+	$css = file_get_contents($cssfile);
+	$directory = get_stylesheet_directory_uri();
 
-$cssfile = get_stylesheet_directory() . "/style.css";
-$css = file_get_contents($cssfile);
-$directory = get_stylesheet_directory_uri();
-
-// Rewrite relative URLs
-$css = preg_replace('!url\(\s?\'?"?(.+?)\'?"?\s?\)!', "url(\\1)", $css);
-$css = preg_replace('!url\(([^/].+?)\)!', "url($directory/\\1)", $css);
+	// Rewrite relative URLs
+	$css = preg_replace('!url\(\s?\'?"?(.+?)\'?"?\s?\)!', "url(\\1)", $css);
+	$css = preg_replace('!url\(([^/].+?)\)!', "url($directory/\\1)", $css);
+}
 
 // Add Speedy Smilies CSS
 $css .= ".wp-smiley { background-image: url($q_smilies_src); background-repeat: no-repeat; vertical-align: text-top; padding: 0; border: none; height: {$q_smilies_height}px; width: {$q_smilies_width}px }";

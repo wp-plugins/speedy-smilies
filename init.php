@@ -10,6 +10,24 @@
 */
 
 
+// Check for incompatible plugins
+function q_smilies_compatibility_check() {
+	global $q_smilies_warninghtml;
+	$method = get_option('speedy_smilies_method');
+	$q_smilies_warninghtml = '';
+	remove_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
+	if (has_filter('stylesheet_uri')) {
+		$q_smilies_warninghtml = '<div class="q_smilies_error"><strong>Compatibility Warning:</strong> Another plugin is attempting to use the <code>stylesheet_uri</code> filter. Speedy Smilies should still work, but for optimal speed and performance, disable the conflicting plugin then enable the preferred method below.</div>';
+		if ($method === 'fast') {
+			$method = 'slow';
+			update_option('speedy_smilies_method', 'slow');
+		}
+	}
+	if ($method === 'fast') add_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
+	return $q_smilies_warninghtml;
+}
+
+
 // List the smilie sets. This should be automated, but for now we are just hard coding the different sets
 function q_smilies_list_sets() {
 	return array(
@@ -233,15 +251,6 @@ function q_smilies_load_set() {
 	$q_smilies_src = plugins_url(NULL, __FILE__) . "/$q_smilies_set.png";
 }
 
-
-// Check for incompatible plugins
-function q_smilies_compatibility_check() {
-	$warninghtml = '';
-	remove_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
-	if (has_filter('stylesheet_uri')) $warninghtml = '<div class="error"><p><strong>Compatibility Warning:</strong> Speedy Smilies manipulates your blog&apos;s CSS using the <code>stylesheet_uri</code> WordPress filter, but another plugin is attempting to use this same filter. You must disable the other plugin to use Speedy Smilies.</p></div>';
-	add_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
-	return $warninghtml;
-}
 
 function q_smilies_sample_text() {
 	global $q_smilies_set, $user_identity;

@@ -26,6 +26,9 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 
 == Changelog ==
 
+= 0.7 =
+* Added a workaround for incompatible themes and plugins. When enabled, Speedy Smilies will add a second stylesheet to your blog, leaving your theme's stylesheet unchanged. The default behavior is to combine the CSS from your theme and the Speedy Smilies plugin into a single, minified CSS file.
+
 = 0.6 =
 * Bug fix: For increased security, style.php will not execute when the plugin is disabled.
 
