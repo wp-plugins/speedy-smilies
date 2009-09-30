@@ -10,8 +10,6 @@
 */
 
 
-require_once('init.php');
-
 // Check for incompatible plugins
 q_smilies_compatibility_check();
 
@@ -34,15 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	} else {
 		update_option('use_smilies', '1');
 		q_smilies_init();
+		q_smilies_rebuild();
 		q_smilies_admin_styles();
 		$a = $q_smilies_sets[$_POST['speedy_smilies_set']];
-		if ($a['author']) $updatedhtml = '<div class="updated"><p><strong>Settings saved. Please update your blog&apos;s footer or &quot;About&quot; page to give credit to <a target="_blank" href="' . $a['authoruri'] . '">' . $a['author'] . '</a>.</strong></p></div>';
+		if ($a['author']) $updatedhtml = '<div class="updated"><p><strong>Settings saved. Please ensure your blog&apos;s footer or &quot;About&quot; page gives credit to <a target="_blank" href="' . $a['authoruri'] . '">' . $a['author'] . '</a>.</strong></p></div>';
 		else $updatedhtml = '<div class="updated"><p><strong>Settings saved.</strong></p></div>';
 	}
 }
 
 
 // Display admin form
+$cachedate = date("j F Y \a\\t g:i:s a", get_option('speedy_smilies_cache'));
 $disabled = !get_option('use_smilies');
 $q_smilies_set = get_option('speedy_smilies_set');
 if (!$q_smilies_set) $q_smilies_set = 'wordpress';
@@ -55,7 +55,7 @@ foreach ($q_smilies_sets as $set => $a) {
 
 	$formhtml .= '<img src="' . WP_PLUGIN_URL . '/speedy-smilies/' . $set . '.png" alt="' . $a['name'] . '" title="' . $a['name']. '" /><br /><br />';
 }
-$formhtml .= '</fieldset><fieldset id ="q_smilies_fieldset_advanced"><legend>Advanced Settings</legend>How should Speedy Smilies modify your blog&apos;s stylesheets? ' . $q_smilies_warninghtml . '<div class="q_smilies_indent_div"><label><input name="speedy_smilies_method" type="radio" value="fast"'. (get_option('speedy_smilies_method') === 'fast' ? ' checked="checked"' : '') . ($q_smilies_warninghtml || $disabled ? ' disabled="disabled"' : '') . ' /> Use the faster preferred method</label><div class="q_smilies_small_div">The theme and Speedy Smilies style rules will be combined into a single, minified CSS file.</div><label><input name="speedy_smilies_method" type="radio" value="slow"'. (get_option('speedy_smilies_method') !== 'fast' ? ' checked="checked"' : '') . ($q_smilies_warninghtml || $disabled ? ' disabled="disabled"' : '') . ' /> Use the slower compatibility method</label><div class="q_smilies_small_div">The Speedy Smilies style rules will be loaded from an independent CSS file. This partially defeats the purpose of this plugin, but may allow you to use Speedy Smilies with incompatible plugins or broken themes.</div></div></fieldset><p class="submit"><input type="submit" name="Submit" class="button-primary" value="Save Changes" /></p>';
+$formhtml .= '</fieldset><fieldset id ="q_smilies_fieldset_advanced"><legend>Advanced Settings</legend>How should Speedy Smilies modify your blog&apos;s stylesheets? ' . $q_smilies_warninghtml . '<div class="q_smilies_indent_div"><label><input name="speedy_smilies_method" type="radio" value="fast"'. (get_option('speedy_smilies_method') === 'fast' ? ' checked="checked"' : '') . ($q_smilies_warninghtml || $disabled ? ' disabled="disabled"' : '') . ' /> Use the faster preferred method</label><div class="q_smilies_small_div">The theme and Speedy Smilies style rules will be combined into a single, minified CSS file.</div><label><input name="speedy_smilies_method" type="radio" value="slow"'. (get_option('speedy_smilies_method') !== 'fast' ? ' checked="checked"' : '') . ($q_smilies_warninghtml || $disabled ? ' disabled="disabled"' : '') . ' /> Use the slower compatibility method</label><div class="q_smilies_small_div">The Speedy Smilies style rules will be loaded from an independent CSS file. This partially defeats the purpose of this plugin, but may allow you to use Speedy Smilies with incompatible plugins or broken themes.</div></div><p>The stylesheet cache was last updated on <b>' . $cachedate . '</b>. This cache updates automatically when you change themes or when you click &quot;Save Changes&quot; below.</p></fieldset><p class="submit"><input type="submit" name="Submit" class="button-primary" value="Save Changes" /></p>';
 
 $sampletext = q_smilies_replace(q_smilies_sample_text());
 

@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 0.7
+Version: 0.8
 Author URI: http://quietmint.com/
 
 
@@ -65,7 +65,7 @@ function q_smilies_input_disable(element, state) {
 }
 </script>
 <style type='text/css'>
-form.q_smilies_form fieldset {border:1px solid #DFDFDF;margin:0 0 1.5em;padding:0.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;}form.q_smilies_form legend {font-weight:bold;margin-left:-1em;}.q_smilies_sample {float:right;width:35%;margin-left:2em;}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px; line-height:14px; margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px; line-height:14px; margin-bottom: 10px}.q_smilies_error{background-color:#FFEBE8;border: 1px solid #CC0000;-moz-border-radius: 3px;-khtml-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;margin:4px 0;padding:2px 0.6em;}
+.q_smilies_form fieldset{border:1px solid #DFDFDF;margin:0 0 1.5em;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{float:right;width:35%;margin:8px 0 0 2em}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}
 HTML;
 	if(!empty($q_smilies_src)) {
 		print ".wp-smiley{background-image:url($q_smilies_src);background-repeat:no-repeat;vertical-align:text-top;padding:0;border:none;height:{$q_smilies_height}px;width:{$q_smilies_width}px}";
@@ -85,6 +85,22 @@ function q_smilies_meta_box() {
 	print '<div style="clear: both;"></div>';
 }
 
+// Check for incompatible plugins
+function q_smilies_compatibility_check() {
+	global $q_smilies_warninghtml;
+	$method = get_option('speedy_smilies_method');
+	$q_smilies_warninghtml = '';
+	remove_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
+	if (has_filter('stylesheet_uri')) {
+		$q_smilies_warninghtml = '<div class="q_smilies_error"><strong>Compatibility Warning:</strong> Another plugin is attempting to use the <code>stylesheet_uri</code> filter. Speedy Smilies should still work, but for optimal speed and performance, disable the conflicting plugin then enable the preferred method below.</div>';
+		if ($method === 'fast') {
+			$method = 'slow';
+			update_option('speedy_smilies_method', 'slow');
+		}
+	}
+	if ($method === 'fast') add_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
+}
+
 function q_smilies_init() {
 	global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions, $q_smilies_search, $q_smilies_replace;
 
@@ -99,6 +115,9 @@ function q_smilies_init() {
 		$q_smilies_search[] = '/(\s|^)' . preg_quote( $smiley, '/' ) . '(\s|$)/';		
 		$q_smilies_replace[] = " <img src='" . includes_url() . "/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /> ";
 	}
+	
+	// Rebuild CSS cache if necessary
+	if (!get_option('speedy_smilies_cache')) q_smilies_rebuild();
 }
 
 function q_smilies_replace($text) {
@@ -119,8 +138,52 @@ function q_smilies_replace($text) {
 	return $output;
 }
 
-function q_smilies_stylesheet_uri() { return plugins_url(NULL, __FILE__) . "/style.php"; }
-function q_smilies_stylesheet_head() { print '<link rel="stylesheet" type="text/css" href="' . plugins_url(NULL, __FILE__) . '/style.php?standalone=1" />' . "\r\n"; }
+function q_smilies_stylesheet_uri() { return plugin_dir_url(__FILE__) . 'cache/' . get_option('speedy_smilies_cache') . '.css'; }
+function q_smilies_stylesheet_head() { print '<link rel="stylesheet" type="text/css" href="' . plugin_dir_url(__FILE__) . 'cache/' . get_option('speedy_smilies_cache') . '_standalone.css" />' . "\r\n"; }
+
+function q_smilies_rebuild() {
+	global $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
+	
+	// Load the theme's CSS
+	$cssfile = get_stylesheet_directory() . '/style.css';
+	$css = file_get_contents($cssfile);
+	$directory = get_stylesheet_directory_uri();
+
+	// Rewrite relative URLs in theme CSS
+	$css = preg_replace('!url\(\s?\'?"?(.+?)\'?"?\s?\)!', "url(\\1)", $css);
+	$css = preg_replace('!url\(([^/].+?)\)!', "url($directory/\\1)", $css);
+
+	// Compress theme CSS
+	$css = preg_replace('!/\*.+?\*/!s', "", $css);
+	$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
+	$css = preg_replace('!;}!', "}", $css);
+	$css = preg_replace('![\r\n]!', "", $css);
+	$css = preg_replace('!\s+!', " ", $css);
+	$css = preg_replace('!([: ])0(px|em|%)!', "\${1}0", $css);
+	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \1 \1!iU', "$1", $css);
+	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
+	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
+
+	// Generate Speedy Smilies CSS
+	$smiliescss = ".wp-smiley{background-image:url($q_smilies_src);background-repeat:no-repeat;vertical-align:text-top;padding:0;border:none;height:{$q_smilies_height}px;width:{$q_smilies_width}px}";
+	foreach (array_unique($q_smilies_positions) as $smiley => $position) $css .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px}";
+
+	// Delete old CSS files
+	$dir = plugin_dir_path(__FILE__);
+	if (is_dir("{$dir}cache")) {	
+		$oldcache = get_option('speedy_smilies_cache');
+		if($oldcache) {
+			@unlink("{$dir}cache/{$oldcache}.css");
+			@unlink("{$dir}cache/{$oldcache}_standalone.css");
+		}
+	} else { @mkdir("{$dir}cache"); }
+
+	// Save new CSS files
+	$newcache = microtime(1);
+	file_put_contents("{$dir}cache/{$newcache}.css", $css . $smiliescss);
+	file_put_contents("{$dir}cache/{$newcache}_standalone.css", $smiliescss);
+	update_option('speedy_smilies_cache', $newcache);
+}
 
 // Disable WordPress default smilies
 remove_action('init', 'smilies_init', 5);
@@ -136,7 +199,7 @@ add_filter('the_content', 'q_smilies_replace');
 add_filter('the_excerpt', 'q_smilies_replace');
 add_filter('comment_text', 'q_smilies_replace', 20);
 
-// Engage Speedy Smilies using the selected method
+// Select method of implementation
 $method = get_option('speedy_smilies_method');
 if (!$method) {
 	// If no method is selected, default to fast unless there are known compatibility problems
@@ -144,4 +207,9 @@ if (!$method) {
 	q_smilies_compatibility_check();
 	$method = get_option('speedy_smilies_method');
 }
-if ($method === 'fast') add_filter('stylesheet_uri', 'q_smilies_stylesheet_uri'); else add_filter('wp_head', 'q_smilies_stylesheet_head');
+
+// Engage Speedy Smilies
+if ($method === 'fast') {
+	add_filter('stylesheet_uri', 'q_smilies_stylesheet_uri'); 
+	add_action('switch_theme', 'q_smilies_rebuild');
+} else add_filter('wp_head', 'q_smilies_stylesheet_head');

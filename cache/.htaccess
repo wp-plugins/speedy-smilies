@@ -1,0 +1,14 @@
+# Disable unnecessary Etag: header
+FileETag none
+
+# Add far-future (plus one year) Expires: header
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault A31104000
+</IfModule>
+
+# Add Cache-Control: header
+<IfModule mod_headers.c>
+    Header unset Pragma
+    Header append Cache-Control public
+</IfModule>
