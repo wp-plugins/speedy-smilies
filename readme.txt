@@ -15,19 +15,35 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 
 == Installation ==
 
-1. Extract `speedy-smilies.zip` and upload the resulting `speedy-smilies` directory to `wp-content/plugins/speedy-smilies`. The plugin directory must be named `speedy-smilies`.
+1. Extract `speedy-smilies.zip` and upload the resulting `speedy-smilies` directory to `wp-content/plugins/speedy-smilies`.
 1. Activate the plugin through the 'Plugins' section of WordPress.
-1. Configure the plugin using the new 'Speedy Smilies' section under the 'Appearance' section of WordPress.
+1. Configure the plugin using the 'Speedy Smilies' page under the 'Appearance' section of WordPress.
 
 == Screenshots ==
 
 1. Here we're looking at the control panel settings page for the plugin where you can select a smilie set.
 2. An editing pane allows you to insert smilies into posts and pages simply by clicking on them.
 
+== Frequently Asked Questions ==
+
+= How do I report a bug or request a feature? =
+
+I'd love to hear your feedback. Please visit the [Speedy Smilies](http://quietmint.com/speedy-smilies/) plugin homepage to leave me a comment.
+
+= How do I create my own smilies sets? =
+
+As of version 0.9, smilie sets are modular so you can add your own set of emoticons for use with the Speedy Smilies plugin. Each smilie set has a `.png` image and a `.php` file of the same name inside of the `sets/` directory.
+
+At this time, there's no automated way to create the necessary PNG image and PHP file required for a smilie set, so your best bet is to learn by example. Let me know if a guided wizard to create new smilie sets is a feature that you'd like to see added in the future.
+
 == Changelog ==
 
+= 0.9 (10/13/09) =
+* In addition to regenerating the cached stylesheets when you switch to another theme, Speedy Smilies automatically regenerates the cache when it detects changes in the current theme's `style.css`. For added clarity, a notification is displayed inside of the admin control panel whenever Speedy Smilies regenerates the stylesheet.
+* Smilies sets are loaded dynamically instead of being hard-coded. Each smilie set has a `.png` image and a `.php` file of the same name inside of the `sets/` directory.
+
 = 0.8 (9/30/09) =
-* Added CSS caching. Instead of dynamically generating stylesheets via style.php on each visit, stylesheets are generated only once when changing the theme or smilie set. If you are using the Apache web server, the included `.htaccess` file in the `cache` directory automatically serves these cached CSS files with appropriate Cache-Control: and Expires: HTTP headers.
+* Added CSS caching. Instead of dynamically generating stylesheets via style.php on each visit, stylesheets are generated only once when changing the theme or smilie set. If you are using the Apache web server, the included `.htaccess` file in the `cache/` directory automatically serves these cached CSS files with appropriate Cache-Control: and Expires: HTTP headers.
 
 = 0.7 (9/26/09) =
 * Added a workaround for incompatible themes and plugins. When enabled, Speedy Smilies will add a second stylesheet to your blog, leaving your theme's stylesheet unchanged. The default behavior is to combine the CSS from your theme and the Speedy Smilies plugin into a single, minified CSS file.

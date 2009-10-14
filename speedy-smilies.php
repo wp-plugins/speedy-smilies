@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 0.8
+Version: 0.9
 Author URI: http://quietmint.com/
 
 
@@ -28,12 +28,12 @@ Author URI: http://quietmint.com/
 */
 
 
-require_once('init.php');
+global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions, $q_smilies_search, $q_smilies_replace;
 $q_smilies_set = get_option('speedy_smilies_set');
 
 function q_smilies_admin_menu() {
 	global $q_smilies_src;
-	add_theme_page('Speedy Smilies', 'Speedy Smilies', 8, 'speedy-smilies/admin.php');
+	add_theme_page('Speedy Smilies', '<img class="q_smilies_icon_menu" src="' . plugin_dir_url(__FILE__) . 'icon.gif" /> Speedy Smilies', 8, 'speedy-smilies/admin.php');
 
 	if(empty($q_smilies_src)) return;
 	add_meta_box('q_smilies_sectionid', __( 'Speedy Smilies', 'q_smilies_textdomain' ), 'q_smilies_meta_box', 'post', 'side', 'high');
@@ -41,37 +41,26 @@ function q_smilies_admin_menu() {
 }
 
 function q_smilies_admin_styles() {
-	global $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
-	print <<<HTML
-<!-- Begin Speedy Smilies plugin -->
-<script type='text/javascript'>
-function q_smilies_insert(addition) {
-	try { tinyMCE.execCommand("mceInsertContent", false, " " + addition + " "); }
-	catch(e) {
-		var content = document.getElementById('content');
-		var startPos = content.selectionStart;
-		var endPos = content.selectionEnd;
-		content.value = content.value.substring(0, startPos) +  addition + content.value.substring(endPos, content.value.length);
-		content.selectionStart = endPos + addition.length;
-		content.selectionEnd = content.selectionStart;
-		content.focus();
+	$cssfile = get_stylesheet_directory() . '/style.css';
+	$cssstat = stat($cssfile);
+	if (get_option('speedy_smilies_themecache') !== $cssstat['size'] . '-' . $cssstat['mtime'] . '-' . $cssstat['ino']) {
+		q_smilies_rebuild();
 	}
-	return false;
-}
-
-function q_smilies_input_disable(element, state) {
-	var input = document.getElementById(element).getElementsByTagName("input");
-	for(var i = 0; i < input.length; i++) input[i].disabled = state;
-}
+	unset($cssstat);
+	
+	print <<<HTML
+<!-- Begin Speedy Smilies plugin admin -->
+<script type='text/javascript'>
+/* <![CDATA[ */
+function q_smilies_insert(addition){try{tinyMCE.execCommand("mceInsertContent",false," "+addition+" ")}catch(e){var content=document.getElementById('content');var startPos=content.selectionStart;var endPos=content.selectionEnd;content.value=content.value.substring(0,startPos)+addition+content.value.substring(endPos,content.value.length);content.selectionStart=endPos+addition.length;content.selectionEnd=content.selectionStart;content.focus()}return false}function q_smilies_input_disable(element,state){var input=document.getElementById(element).getElementsByTagName("input");for(var i=0;i<input.length;i++)input[i].disabled=state}
+/* ]]> */
 </script>
 <style type='text/css'>
-.q_smilies_form fieldset{border:1px solid #DFDFDF;margin:0 0 1.5em;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{float:right;width:35%;margin:8px 0 0 2em}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}
+.q_smilies_form fieldset{border:1px solid #DFDFDF;margin:0 300px 1.5em 0;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{margin-top:8px;float:right;width:280px}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}.q_smilies_icon{padding-right:5px;vertical-align:top}.q_smilies_icon_menu{padding-right:4px;vertical-align:text-top}
 HTML;
-	if(!empty($q_smilies_src)) {
-		print ".wp-smiley{background-image:url($q_smilies_src);background-repeat:no-repeat;vertical-align:text-top;padding:0;border:none;height:{$q_smilies_height}px;width:{$q_smilies_width}px}";
-		foreach (array_unique($q_smilies_positions) as $smiley => $position) print ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px}";
-	}
-	print "\r\n</style>\r\n<!-- End Speedy Smilies plugin -->\r\n";
+	print "\r\n</style>\r\n";
+	q_smilies_stylesheet_head();
+	print "<!-- End Speedy Smilies plugin admin -->\r\n";
 }
 
 function q_smilies_meta_box() {
@@ -80,10 +69,11 @@ function q_smilies_meta_box() {
 
 	foreach (array_unique($q_smilies_positions) as $smiley => $position) {
 		$alt = attribute_escape($smiley);
-		print " <a class='smiley' href='#' onclick='q_smilies_insert(\" $alt \");'><img src='" . includes_url() . "/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /></a> ";
+		print " <a class='smiley' href='#' onclick='q_smilies_insert(\" $alt \");'><img src='" . includes_url() . "images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /></a> ";
 	}
 	print '<div style="clear: both;"></div>';
 }
+
 
 // Check for incompatible plugins
 function q_smilies_compatibility_check() {
@@ -101,24 +91,40 @@ function q_smilies_compatibility_check() {
 	if ($method === 'fast') add_filter('stylesheet_uri', 'q_smilies_stylesheet_uri');
 }
 
+
+function q_smilies_activate() {
+	add_option('speedy_smilies_set', 'wordpress', '', 'yes');
+	add_option('speedy_smilies_method', '', '', 'yes');
+	add_option('speedy_smilies_cache', '', '', 'yes');
+	add_option('speedy_smilies_themecache', '', '', 'no');
+	add_option('speedy_smilies_donotify', '', '', 'no');
+}
+
+
 function q_smilies_init() {
 	global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions, $q_smilies_search, $q_smilies_replace;
-
 	$q_smilies_src = ''; $q_smilies_width = 0; $q_smilies_height= 0; $q_smilies_positions = array(); $q_smilies_search = array(); $q_smilies_replace = array();
 
 	// Don't bother setting up smilies if they are disabled
 	if (!get_option('use_smilies')) return;
 
-	q_smilies_load_set();
+	$toeval = 'return array( ' . file_get_contents(plugin_dir_path(__FILE__) . "sets/$q_smilies_set.php") . ');';
+	$set_array = eval($toeval);
+	$q_smilies_width = $set_array['width'];
+	$q_smilies_height = $set_array['height'];
+	$q_smilies_positions = $set_array['map'];
+	$q_smilies_src = plugin_dir_url(__FILE__) . "sets/$q_smilies_set.png";
+
 	foreach ($q_smilies_positions as $smiley => $position) {
 		$alt = attribute_escape($smiley);
 		$q_smilies_search[] = '/(\s|^)' . preg_quote( $smiley, '/' ) . '(\s|$)/';		
-		$q_smilies_replace[] = " <img src='" . includes_url() . "/images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /> ";
+		$q_smilies_replace[] = " <img src='" . includes_url() . "images/blank.gif' alt='$alt' title='$alt' class='wp-smiley smiley-$position' /> ";
 	}
 	
 	// Rebuild CSS cache if necessary
 	if (!get_option('speedy_smilies_cache')) q_smilies_rebuild();
 }
+
 
 function q_smilies_replace($text) {
 	global $q_smilies_search, $q_smilies_replace;
@@ -141,11 +147,23 @@ function q_smilies_replace($text) {
 function q_smilies_stylesheet_uri() { return plugin_dir_url(__FILE__) . 'cache/' . get_option('speedy_smilies_cache') . '.css'; }
 function q_smilies_stylesheet_head() { print '<link rel="stylesheet" type="text/css" href="' . plugin_dir_url(__FILE__) . 'cache/' . get_option('speedy_smilies_cache') . '_standalone.css" />' . "\r\n"; }
 
-function q_smilies_rebuild() {
+
+function q_smilies_rebuild_notify() {
+	$cachedate = date("j M Y \a\\t g:i a", get_option('speedy_smilies_cache'));
+	print '<div class="updated fade"><p><strong><img class="q_smilies_icon" src="' . plugin_dir_url(__FILE__) . 'icon.gif" /> Speedy Smilies</strong> detected a change in your blog and regenerated the stylesheet cache on ' . $cachedate . '</p></div>';
+	update_option('speedy_smilies_donotify', '');
+}
+
+function q_smilies_rebuild($donotify = true) {
 	global $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
 	
-	// Load the theme's CSS
+	// Save the stat info for the theme's CSS to auto-detect changes later
 	$cssfile = get_stylesheet_directory() . '/style.css';
+	$cssstat = stat($cssfile);
+	update_option('speedy_smilies_themecache', $cssstat['size'] . '-' . $cssstat['mtime'] . '-' . $cssstat['ino']);
+	unset($cssstat);
+
+	// Load the theme's CSS
 	$css = file_get_contents($cssfile);
 	$directory = get_stylesheet_directory_uri();
 
@@ -166,7 +184,7 @@ function q_smilies_rebuild() {
 
 	// Generate Speedy Smilies CSS
 	$smiliescss = ".wp-smiley{background-image:url($q_smilies_src);background-repeat:no-repeat;vertical-align:text-top;padding:0;border:none;height:{$q_smilies_height}px;width:{$q_smilies_width}px}";
-	foreach (array_unique($q_smilies_positions) as $smiley => $position) $css .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px}";
+	foreach (array_unique($q_smilies_positions) as $smiley => $position) $smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px}";
 
 	// Delete old CSS files
 	$dir = plugin_dir_path(__FILE__);
@@ -183,6 +201,12 @@ function q_smilies_rebuild() {
 	file_put_contents("{$dir}cache/{$newcache}.css", $css . $smiliescss);
 	file_put_contents("{$dir}cache/{$newcache}_standalone.css", $smiliescss);
 	update_option('speedy_smilies_cache', $newcache);
+
+	// Notify admin user
+	if ($donotify) {
+		update_option('speedy_smilies_donotify', 'yes');
+		add_action('admin_notices', 'q_smilies_rebuild_notify');
+	}
 }
 
 // Disable WordPress default smilies
@@ -192,9 +216,11 @@ remove_filter('the_excerpt', 'convert_smilies');
 remove_filter('comment_text', 'convert_smilies', 20);
 
 // Add Speedy Smilies hooks
+register_activation_hook(__FILE__, 'q_smilies_activate');
 add_action('init', 'q_smilies_init', 5);
 add_action('admin_menu', 'q_smilies_admin_menu');
 add_action('admin_print_styles', 'q_smilies_admin_styles');
+if (get_option('speedy_smilies_donotify') === 'yes') add_action('admin_notices', 'q_smilies_rebuild_notify');
 add_filter('the_content', 'q_smilies_replace');
 add_filter('the_excerpt', 'q_smilies_replace');
 add_filter('comment_text', 'q_smilies_replace', 20);
