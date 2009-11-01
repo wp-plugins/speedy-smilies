@@ -3,7 +3,7 @@ Contributors: quietmint
 Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smilie, smiles, smile, emoticons, emoticon, emotes, emote, css, css sprite, css sprites, css image sprite, css image sprites, image sprite, image sprites, css minification, css compression, css optimization
 Requires at least: 2.8
-Tested up to: 2.8.4
+Tested up to: 2.8.5
 Stable tag: trunk
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
@@ -28,7 +28,7 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 
 = How do I report a bug or request a feature? =
 
-I'd love to hear your feedback. Please visit the [Speedy Smilies](http://quietmint.com/speedy-smilies/) plugin homepage to leave me a comment.
+I'd love to hear your feedback. Please visit the [WordPress.org Forums for Speedy Smilies](http://wordpress.org/tags/speedy-smilies) to leave comments.
 
 = How do I create my own smilies sets? =
 
@@ -37,6 +37,10 @@ As of version 0.9, smilie sets are modular so you can add your own set of emotic
 At this time, there's no automated way to create the necessary PNG image and PHP file required for a smilie set, so your best bet is to learn by example. Let me know if a guided wizard to create new smilie sets is a feature that you'd like to see added in the future.
 
 == Changelog ==
+
+= 1.0 (11/1/09) =
+* Added contextual help option linking to the support page for Speedy Smilies.
+* Bug fix: Removed extra margins when viewing the administration page in Webkit browsers.
 
 = 0.9 (10/13/09) =
 * In addition to regenerating the cached stylesheets when you switch to another theme, Speedy Smilies automatically regenerates the cache when it detects changes in the current theme's `style.css`. For added clarity, a notification is displayed inside of the admin control panel whenever Speedy Smilies regenerates the stylesheet.

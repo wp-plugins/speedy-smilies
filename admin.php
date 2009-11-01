@@ -112,6 +112,7 @@ $sampletext = q_smilies_replace(q_smilies_sample_text());
 
 print <<<HTML
 <div class="wrap">
+<div class="q_smilies_help">Questions? Bugs?<br />Click here for help</div>
 <div id="icon-themes" class="icon32"><br /></div>
 <h2>Speedy Smilies</h2>
 $updatedhtml

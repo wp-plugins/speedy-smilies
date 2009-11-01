@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 0.9
+Version: 1.0
 Author URI: http://quietmint.com/
 
 
@@ -34,6 +34,7 @@ $q_smilies_set = get_option('speedy_smilies_set');
 function q_smilies_admin_menu() {
 	global $q_smilies_src;
 	add_theme_page('Speedy Smilies', '<img class="q_smilies_icon_menu" src="' . plugin_dir_url(__FILE__) . 'icon.gif" /> Speedy Smilies', 8, 'speedy-smilies/admin.php');
+	add_contextual_help('speedy-smilies/admin', '<p>Speedy Smilies lets you easily change the appearance of the smilies (also called emoticons) that are displayed on your WordPress site.</p><p>Please visit the <a href="http://wordpress.org/tags/speedy-smilies" target="_blank">WordPress.org Forums for Speedy Smilies</a> to ask questions, leave comments, or report bugs.');
 
 	if(empty($q_smilies_src)) return;
 	add_meta_box('q_smilies_sectionid', __( 'Speedy Smilies', 'q_smilies_textdomain' ), 'q_smilies_meta_box', 'post', 'side', 'high');
@@ -48,6 +49,7 @@ function q_smilies_admin_styles() {
 	}
 	unset($cssstat);
 	
+	$pluginurl = plugin_dir_url(__FILE__);
 	print <<<HTML
 <!-- Begin Speedy Smilies plugin admin -->
 <script type='text/javascript'>
@@ -56,7 +58,7 @@ function q_smilies_insert(addition){try{tinyMCE.execCommand("mceInsertContent",f
 /* ]]> */
 </script>
 <style type='text/css'>
-.q_smilies_form fieldset{border:1px solid #DFDFDF;margin:0 300px 1.5em 0;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{margin-top:8px;float:right;width:280px}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}.q_smilies_icon{padding-right:5px;vertical-align:top}.q_smilies_icon_menu{padding-right:4px;vertical-align:text-top}
+.q_smilies_form fieldset{border:1px solid #DFDFDF;margin-bottom:1.5em;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{margin:8px 0 0 20px;float:right;width:280px}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}.q_smilies_icon{padding-right:5px;vertical-align:top}.q_smilies_icon_menu{padding-right:4px;vertical-align:text-top}.q_smilies_help{float:right;margin:24px -18px 0 0;padding-right:18px;font-size:9px;line-height:11px;background:url(${pluginurl}helparrow.png) no-repeat center right;text-align:right;color:#D54E21;}
 HTML;
 	print "\r\n</style>\r\n";
 	q_smilies_stylesheet_head();
