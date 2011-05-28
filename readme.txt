@@ -3,7 +3,7 @@ Contributors: quietmint
 Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smilie, smiles, smile, emoticons, emoticon, emotes, emote, css, css sprite, css sprites, css image sprite, css image sprites, image sprite, image sprites, css minification, css compression, css optimization
 Requires at least: 2.8
-Tested up to: 2.8.5
+Tested up to: 3.1.3
 Stable tag: trunk
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
@@ -38,35 +38,38 @@ At this time, there's no automated way to create the necessary PNG image and PHP
 
 == Changelog ==
 
-= 1.0 (11/1/09) =
+= 1.1 (5/28/2011) =
+* Bug fix: Smilie images use the `!important` CSS declaration to prevent conflicts with style rules in your WordPress theme ([reported here](http://wordpress.org/support/topic/plugin-speedy-smilies-smilies-not-visible)).
+
+= 1.0 (11/1/2009) =
 * Added contextual help option linking to the support page for Speedy Smilies.
 * Bug fix: Removed extra margins when viewing the administration page in Webkit browsers.
 
-= 0.9 (10/13/09) =
+= 0.9 (10/13/2009) =
 * In addition to regenerating the cached stylesheets when you switch to another theme, Speedy Smilies automatically regenerates the cache when it detects changes in the current theme's `style.css`. For added clarity, a notification is displayed inside of the admin control panel whenever Speedy Smilies regenerates the stylesheet.
 * Smilies sets are loaded dynamically instead of being hard-coded. Each smilie set has a `.png` image and a `.php` file of the same name inside of the `sets/` directory.
 
-= 0.8 (9/30/09) =
+= 0.8 (9/30/2009) =
 * Added CSS caching. Instead of dynamically generating stylesheets via style.php on each visit, stylesheets are generated only once when changing the theme or smilie set. If you are using the Apache web server, the included `.htaccess` file in the `cache/` directory automatically serves these cached CSS files with appropriate Cache-Control: and Expires: HTTP headers.
 
-= 0.7 (9/26/09) =
+= 0.7 (9/26/2009) =
 * Added a workaround for incompatible themes and plugins. When enabled, Speedy Smilies will add a second stylesheet to your blog, leaving your theme's stylesheet unchanged. The default behavior is to combine the CSS from your theme and the Speedy Smilies plugin into a single, minified CSS file.
 
-= 0.6 (9/19/09) =
+= 0.6 (9/19/2009) =
 * Bug fix: For increased security, style.php will not execute when the plugin is disabled.
 
-= 0.5 (9/14/09) =
+= 0.5 (9/14/2009) =
 * Bug fix: The plugin now makes use of the include_url() function instead and will now work properly if you've installed your blog into a subdirectory (e.g., http://yourdomain.com/blog/).
 
-= 0.4 (9/10/09) =
+= 0.4 (9/10/2009) =
 * Compatible with WordPress 2.8.4.
 * Realized that style.php is executing on EVERY page load and wasn't cacheable by browsers. Oops. For the time being, we now cache style.php for 10 minutes; a better solution is forthcoming.
 
-= 0.3 (7/15/09) =
+= 0.3 (7/15/2009) =
 * Added a basic check for incompatible plugins.
 * CSS is now minified as it passes through the Speedy Smilies plugin to yield faster download and rendering times for visitors.
 * Improved the plugin's control panel settings page and added a sample text box to preview smilies (see screenshot).
 * Added two new smilie sets (WordPress Default, in case anyone actually likes the smilies that ship with WordPress, and Moskis).
 
-= 0.2 (7/09/09) =
+= 0.2 (7/9/2009) =
 * First public release!

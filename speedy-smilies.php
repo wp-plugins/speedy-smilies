@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 1.0
+Version: 1.1
 Author URI: http://quietmint.com/
 
 
@@ -33,7 +33,7 @@ $q_smilies_set = get_option('speedy_smilies_set');
 
 function q_smilies_admin_menu() {
 	global $q_smilies_src;
-	add_theme_page('Speedy Smilies', '<img class="q_smilies_icon_menu" src="' . plugin_dir_url(__FILE__) . 'icon.gif" /> Speedy Smilies', 8, 'speedy-smilies/admin.php');
+	add_theme_page('Speedy Smilies', 'Speedy Smilies', 8, 'speedy-smilies/admin.php');
 	add_contextual_help('speedy-smilies/admin', '<p>Speedy Smilies lets you easily change the appearance of the smilies (also called emoticons) that are displayed on your WordPress site.</p><p>Please visit the <a href="http://wordpress.org/tags/speedy-smilies" target="_blank">WordPress.org Forums for Speedy Smilies</a> to ask questions, leave comments, or report bugs.');
 
 	if(empty($q_smilies_src)) return;
@@ -185,8 +185,8 @@ function q_smilies_rebuild($donotify = true) {
 	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
 
 	// Generate Speedy Smilies CSS
-	$smiliescss = ".wp-smiley{background-image:url($q_smilies_src);background-repeat:no-repeat;vertical-align:text-top;padding:0;border:none;height:{$q_smilies_height}px;width:{$q_smilies_width}px}";
-	foreach (array_unique($q_smilies_positions) as $smiley => $position) $smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px}";
+	$smiliescss = ".wp-smiley{background-image:url($q_smilies_src)!important;background-repeat:no-repeat!important;vertical-align:text-top!important;display:inline!important;padding:0!important;border:none!important;height:{$q_smilies_height}px!important;width:{$q_smilies_width}px!important}";
+	foreach (array_unique($q_smilies_positions) as $smiley => $position) $smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
 
 	// Delete old CSS files
 	$dir = plugin_dir_path(__FILE__);
