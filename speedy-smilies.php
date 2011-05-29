@@ -157,7 +157,7 @@ function q_smilies_rebuild_notify() {
 }
 
 function q_smilies_rebuild($donotify = true) {
-	global $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
+	global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
 	
 	// Save the stat info for the theme's CSS to auto-detect changes later
 	$cssfile = get_stylesheet_directory() . '/style.css';
@@ -184,8 +184,15 @@ function q_smilies_rebuild($donotify = true) {
 	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
 	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
 
+	// Embed the image with a data: URI?
+	$includedimage = $q_smilies_src;
+	if(get_option('speedy_smilies_datauri') == 'yes') {
+		$imagebase64 = base64_encode(file_get_contents( dirname(__FILE__) . "/sets/$q_smilies_set.png" ));
+		$includedimage = 'data:image/png;base64,' . $imagebase64;
+	}
+
 	// Generate Speedy Smilies CSS
-	$smiliescss = ".wp-smiley{background-image:url($q_smilies_src)!important;background-repeat:no-repeat!important;vertical-align:text-top!important;display:inline!important;padding:0!important;border:none!important;height:{$q_smilies_height}px!important;width:{$q_smilies_width}px!important}";
+	$smiliescss = ".wp-smiley{background-image:url($includedimage)!important;background-repeat:no-repeat!important;vertical-align:text-top!important;display:inline!important;padding:0!important;border:none!important;height:{$q_smilies_height}px!important;width:{$q_smilies_width}px!important}";
 	foreach (array_unique($q_smilies_positions) as $smiley => $position) $smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
 
 	// Delete old CSS files
