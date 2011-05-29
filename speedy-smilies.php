@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 1.2
+Version: 1.3
 Author URI: http://quietmint.com/
 
 
@@ -58,7 +58,7 @@ function q_smilies_insert(addition){try{tinyMCE.execCommand("mceInsertContent",f
 /* ]]> */
 </script>
 <style type='text/css'>
-.q_smilies_form fieldset{border:1px solid #DFDFDF;margin-bottom:1.5em;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{margin:8px 0 0 20px;float:right;width:280px}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}.q_smilies_icon{padding-right:5px;vertical-align:top}.q_smilies_icon_menu{padding-right:4px;vertical-align:text-top}.q_smilies_help{float:right;margin:24px -18px 0 0;padding-right:18px;font-size:9px;line-height:11px;background:url(${pluginurl}helparrow.png) no-repeat center right;text-align:right;color:#D54E21;}
+.q_smilies_form fieldset{border:1px solid #DFDFDF;margin-bottom:1.5em;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{margin:8px 0 0 20px;float:right;width:280px}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}.q_smilies_icon{padding-right:5px;vertical-align:top}.q_smilies_icon_menu{padding-right:4px;vertical-align:text-top}.q_smilies_help{float:right;margin:24px -18px 0 0;padding-right:18px;font-size:9px;line-height:11px;background:url(${pluginurl}helparrow.png) no-repeat center right;text-align:right;color:#D54E21;}.q_smilies_small{font-size:11px;line-height:14px;}
 HTML;
 	print "\r\n</style>\r\n";
 	q_smilies_stylesheet_head();
@@ -100,6 +100,7 @@ function q_smilies_activate() {
 	add_option('speedy_smilies_cache', '', '', 'yes');
 	add_option('speedy_smilies_themecache', '', '', 'no');
 	add_option('speedy_smilies_donotify', '', '', 'no');
+	add_option('speedy_smilies_datauri', '', '', 'no');
 }
 
 
@@ -210,6 +211,10 @@ function q_smilies_rebuild($donotify = true) {
 	file_put_contents("{$dir}cache/{$newcache}.css", $css . $smiliescss);
 	file_put_contents("{$dir}cache/{$newcache}_standalone.css", $smiliescss);
 	update_option('speedy_smilies_cache', $newcache);
+
+	// Clear cache if WP Super Cache or W3 Total Cache plugins are running
+	if (function_exists('wp_cache_clear_cache')) wp_cache_clear_cache();
+	if (function_exists('w3tc_pgcache_flush')) w3tc_pgcache_flush();
 
 	// Notify admin user
 	if ($donotify) {

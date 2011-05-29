@@ -38,7 +38,13 @@ At this time, there's no automated way to create the necessary PNG image and PHP
 
 == Changelog ==
 
-= 1.2 (5/29/2011) =
+= 1.3 (5/29/2011) =
+* Cached files created by the [WP Super Cache](http://wordpress.org/extend/plugins/wp-super-cache/) and [W3 Total Cache](http://wordpress.org/extend/plugins/w3-total-cache/) plugins are automatically cleared when Speedy Smilies regenerates the CSS.
+* The admin page now displays more information about each smilie set including image dimensions and filesize.
+* Added two new smilie sets (Diagona and Diagona Small).
+* Added `:heart:` emoticon to existing sets Silk and Fugue.
+
+= 1.2 (5/28/2011) =
 * Added inline image embedding. When enabled, the image file will be included within the body of the CSS using a `data:` URI.
 
 = 1.1 (5/28/2011) =

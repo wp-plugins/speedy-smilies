@@ -1,7 +1,7 @@
 'name'		=> 'Fugue',
 'width'		=> 16,
 'height'	=> 16,
-'authors'	=> array('Yusuke Kamiyamane' => 'http://pinvoke.com/'),
+'authors'	=> array('Yusuke Kamiyamane' => 'http://p.yusukekamiyamane.com/'),
 'map'		=> array(
 	':)'		=> 1,
 	':-)'		=> 1,
@@ -73,5 +73,8 @@
 	':arrow:'	=> 22,
 	':!:'		=> 22,
 	':?:'		=> 23,
-	':idea:'	=> 24
+	':idea:'	=> 24,
+	':heart:'	=> 25,
+	':love:'	=> 25,
+	'<3'		=> 25,
 )

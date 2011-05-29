@@ -14,9 +14,10 @@
 function q_smilies_list_sets() {
 	$list = array();
 	foreach (glob(plugin_dir_path(__FILE__) . "sets/*.php") as $set) {
+		$setpng = str_replace('.php', '.png', $set);
 		$toeval = 'return array( ' . str_replace(';', '', file_get_contents($set)) . ');';
 		$set_array = eval($toeval);
-		$list[basename($set, '.php')] = array('name' => $set_array['name'], 'authors' => $set_array['authors']);
+		$list[basename($set, '.php')] = array('name' => $set_array['name'], 'authors' => $set_array['authors'], 'dimensions' => "{$set_array['width']}x{$set_array['height']}", 'bytes' => filesize($setpng));
 	}
 	return $list;
 }
@@ -60,7 +61,7 @@ function q_smilies_sample_text() {
 	);
 	$greeting = array_rand($greetings);
 
-	return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! 8)</p>";
+	return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. 8) All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! <3</p>";
 }
 
 
@@ -108,7 +109,7 @@ if (!$q_smilies_set) $q_smilies_set = 'wordpress';
 $formhtml = '<fieldset><legend>Enable/Disable Smilies</legend><label for="use_smilies"><input name="use_smilies" type="checkbox" id="use_smilies" value="1" onclick="q_smilies_input_disable(\'q_smilies_fieldset_set\', !this.checked);' . ($q_smilies_warninghtml ? '' : 'q_smilies_input_disable(\'q_smilies_fieldset_advanced\', !this.checked)') . '"' . (get_option('use_smilies') ? ' checked="checked"' : '') . '/> ' . _('Convert emoticons like <code>:-)</code> and <code>:-P</code> to graphics on display') . '</label></fieldset><fieldset id ="q_smilies_fieldset_set"><legend>Select Smilie Set</legend><div class="q_smilies_cc_div">These icons have been provided free of charge under a <a target="_blank" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 license</a> (or similar). Your web site must include a link back to the icon author&apos;s page.</div>';
 
 foreach ($q_smilies_sets as $set => $a) {
-	$formhtml .= '<input type="radio" name="speedy_smilies_set" value="' . $set . '"' . ($q_smilies_set == $set ? ' checked="checked"' : '') . ($disabled ? ' disabled="disabled"' : '') . ' /> <strong>' . $a['name'] . '</strong>' . ($a['authors'] ? ' by ' . q_smilies_authors($a['authors']) : '') . '<br /><img src="' . plugin_dir_url(__FILE__) . 'sets/' . $set . '.png" alt="' . $a['name'] . '" title="' . $a['name']. '" /><br /><br />';
+	$formhtml .= '<label><input type="radio" name="speedy_smilies_set" value="' . $set . '"' . ($q_smilies_set == $set ? ' checked="checked"' : '') . ($disabled ? ' disabled="disabled"' : '') . ' /> <strong>' . $a['name'] . ':</strong> <span class="q_smilies_small">' . $a['dimensions'] . ' &mdash; ' . number_format($a['bytes']) . ' bytes' . ($a['authors'] ? ' &mdash; by ' . q_smilies_authors($a['authors']) : '') . '</span><br /><img src="' . plugin_dir_url(__FILE__) . 'sets/' . $set . '.png" alt="' . $a['name'] . '" title="' . $a['name']. '" /></label><br /><br />';
 }
 $formhtml .= '</fieldset><fieldset id ="q_smilies_fieldset_advanced">
 <legend>Advanced Settings</legend>
