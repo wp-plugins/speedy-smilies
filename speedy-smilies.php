@@ -314,20 +314,19 @@ CSS;
 function q_smilies_css_optimize($css) {
 	// Delete comments
 	$css = preg_replace('!/\*.*?\*/!s', "", $css);
-	
+
 	// Delete unnecessary spaces
 	$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
-	$css = preg_replace('![\r\n]!', "", $css);
 	$css = preg_replace('!\s+!', " ", $css);
 	
 	// Delete trailing semicolons
 	$css = preg_replace('!;}!', "}", $css);
 	
 	// Delete unnecessary measurements
-	$css = preg_replace('!(?::| )0(?:%|in|cm|mm|em|ex|pt|pc|px)!', "0", $css);
-	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \1 \1!iU', "$1", $css);
-	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
-	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
+	$css = preg_replace('!([: ])0(%|cm|em|ex|in|mm|pc|pt|px)!', "\${1}0", $css);
+	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \1 \1!iU', ":$1", $css);
+	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \2!iU', ":$1 $2", $css);
+	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \2!iU', ":$1 $2 $3", $css);
 	
 	return $css;
 }

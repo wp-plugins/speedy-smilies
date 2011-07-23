@@ -1,7 +1,7 @@
 'name'		=> 'Moskis',
 'width'		=> 16,
 'height'	=> 15,
-'authors'	=> array('Jos&eacute; Rafael Pardilla' => 'http://blog.moskis.net/downloads/moskis-smiley-pack/'),
+'authors'	=> array('Jos&eacute; Pardilla' => 'http://josepardilla.com/'),
 'map'		=> array(
 	':arrow:'	=> 1,
 	':D'		=> 2,
