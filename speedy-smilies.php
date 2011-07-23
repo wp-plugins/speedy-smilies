@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 1.3
+Version: 14
 Author URI: http://quietmint.com/
 
 
@@ -50,6 +50,89 @@ function q_smilies_admin_styles() {
 	unset($cssstat);
 	
 	$pluginurl = plugin_dir_url(__FILE__);
+	$css = <<<CSS
+.q_smilies_form fieldset {
+	border: 1px solid #DFDFDF;
+	margin-bottom: 1.5em;
+	padding: .5em 2em;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-khtml-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+.q_smilies_form legend {
+	font-weight: 700;
+	margin-left: -1em;
+}
+
+.q_smilies_sample {
+	margin: 8px 0 0 20px;
+	float: right;
+	width: 280px;
+}
+
+a.smiley {
+	padding: 5px;
+	display: block;
+	float: left;
+}
+
+.q_smilies_indent_div {
+	margin-left: 20px;
+}
+
+.q_smilies_small_div {
+	font-size: 11px;
+	line-height: 14px;
+	margin: 0 0 8px 21px;
+}
+
+.q_smilies_cc_div {
+	font-size: 11px;
+	line-height: 14px;
+	margin-bottom: 10px;
+}
+
+.q_smilies_error {
+	background-color: #FFEBE8;
+	border: 1px solid #CC0000;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-khtml-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	margin: 4px 0;
+	padding: 2px .6em;
+}
+
+.q_smilies_icon {
+	padding-right: 5px;
+	vertical-align: top;
+}
+
+.q_smilies_icon_menu {
+	padding-right: 4px;
+	vertical-align: text-top;
+}
+
+.q_smilies_help {
+	float: right;
+	margin: 24px -18px 0 0;
+	padding-right: 18px;
+	font-size: 9px;
+	line-height: 11px;
+	background: url(${pluginurl}helparrow.png) no-repeat center right;
+	text-align: right;
+	color: #D54E21;
+}
+
+.q_smilies_small {
+	font-size: 11px;
+	line-height: 14px;
+}
+CSS;
+	$css = q_smilies_css_optimize($css);
+	
 	print <<<HTML
 <!-- Begin Speedy Smilies plugin admin -->
 <script type='text/javascript'>
@@ -58,9 +141,9 @@ function q_smilies_insert(addition){try{tinyMCE.execCommand("mceInsertContent",f
 /* ]]> */
 </script>
 <style type='text/css'>
-.q_smilies_form fieldset{border:1px solid #DFDFDF;margin-bottom:1.5em;padding:.5em 2em;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}.q_smilies_form legend{font-weight:700;margin-left:-1em}.q_smilies_sample{margin:8px 0 0 20px;float:right;width:280px}a.smiley{padding:5px;display:block;float:left}.q_smilies_indent_div{margin-left:20px}.q_smilies_small_div{font-size:11px;line-height:14px;margin:0 0 8px 21px}.q_smilies_cc_div{font-size:11px;line-height:14px;margin-bottom:10px}.q_smilies_error{background-color:#FFEBE8;border:1px solid #CC0000;-moz-border-radius:3px;-khtml-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;margin:4px 0;padding:2px .6em}.q_smilies_icon{padding-right:5px;vertical-align:top}.q_smilies_icon_menu{padding-right:4px;vertical-align:text-top}.q_smilies_help{float:right;margin:24px -18px 0 0;padding-right:18px;font-size:9px;line-height:11px;background:url(${pluginurl}helparrow.png) no-repeat center right;text-align:right;color:#D54E21;}.q_smilies_small{font-size:11px;line-height:14px;}
+$css
+</style>
 HTML;
-	print "\r\n</style>\r\n";
 	q_smilies_stylesheet_head();
 	print "<!-- End Speedy Smilies plugin admin -->\r\n";
 }
@@ -174,17 +257,6 @@ function q_smilies_rebuild($donotify = true) {
 	$css = preg_replace('!url\(\s?\'?"?(.+?)\'?"?\s?\)!', "url(\\1)", $css);
 	$css = preg_replace('!url\(([^/].+?)\)!', "url($directory/\\1)", $css);
 
-	// Compress theme CSS
-	$css = preg_replace('!/\*.+?\*/!s', "", $css);
-	$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
-	$css = preg_replace('!;}!', "}", $css);
-	$css = preg_replace('![\r\n]!', "", $css);
-	$css = preg_replace('!\s+!', " ", $css);
-	$css = preg_replace('!([: ])0(px|em|%)!', "\${1}0", $css);
-	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \1 \1!iU', "$1", $css);
-	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
-	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
-
 	// Embed the image with a data: URI?
 	$includedimage = $q_smilies_src;
 	if(get_option('speedy_smilies_datauri') == 'yes') {
@@ -193,8 +265,24 @@ function q_smilies_rebuild($donotify = true) {
 	}
 
 	// Generate Speedy Smilies CSS
-	$smiliescss = ".wp-smiley{background-image:url($includedimage)!important;background-repeat:no-repeat!important;vertical-align:text-top!important;display:inline!important;padding:0!important;border:none!important;height:{$q_smilies_height}px!important;width:{$q_smilies_width}px!important}";
-	foreach (array_unique($q_smilies_positions) as $smiley => $position) $smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
+	$smiliescss = <<<CSS
+.wp-smiley {
+	background-image: url($includedimage) !important;
+	background-repeat: no-repeat !important;
+	vertical-align: text-top !important;
+	display: inline !important;
+	padding: 0 !important;
+	border: none !important;
+	height: {$q_smilies_height}px !important;
+	width: {$q_smilies_width}px !important;
+}
+CSS;
+	foreach (array_unique($q_smilies_positions) as $smiley => $position)
+	$smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
+	
+	// Compress and optimize CSS
+	$css = q_smilies_css_optimize($css);
+	$smiliescss = q_smilies_css_optimize($smiliescss);
 
 	// Delete old CSS files
 	$dir = plugin_dir_path(__FILE__);
@@ -221,6 +309,27 @@ function q_smilies_rebuild($donotify = true) {
 		update_option('speedy_smilies_donotify', 'yes');
 		add_action('admin_notices', 'q_smilies_rebuild_notify');
 	}
+}
+
+function q_smilies_css_optimize($css) {
+	// Delete comments
+	$css = preg_replace('!/\*.*?\*/!s', "", $css);
+	
+	// Delete unnecessary spaces
+	$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
+	$css = preg_replace('![\r\n]!', "", $css);
+	$css = preg_replace('!\s+!', " ", $css);
+	
+	// Delete trailing semicolons
+	$css = preg_replace('!;}!', "}", $css);
+	
+	// Delete unnecessary measurements
+	$css = preg_replace('!(?::| )0(?:%|in|cm|mm|em|ex|pt|pc|px)!', "0", $css);
+	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \1 \1!iU', "$1", $css);
+	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \1 \2!iU', "$1 $2", $css);
+	$css = preg_replace('!([0-9]+(?:\.[0-9]*)?+(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|in|cm|mm|em|ex|pt|pc|px)?) \2!iU', "$1 $2 $3", $css);
+	
+	return $css;
 }
 
 // Disable WordPress default smilies
