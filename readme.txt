@@ -3,8 +3,8 @@ Contributors: quietmint
 Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smilie, smiles, smile, emoticons, emoticon, emotes, emote, css, css sprite, css sprites, css image sprite, css image sprites, image sprite, image sprites, css minification, css compression, css optimization
 Requires at least: 2.8
-Tested up to: 3.1.3
-Stable tag: trunk
+Tested up to: 3.2.1
+Stable tag: 13
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
 
