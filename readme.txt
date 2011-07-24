@@ -2,14 +2,14 @@
 Contributors: quietmint
 Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smilie, smiles, smile, emoticons, emoticon, emotes, emote, css, css sprite, css sprites, css image sprite, css image sprites, image sprite, image sprites, css minification, css compression, css optimization
-Requires at least: 2.8
+Requires at least: 3.0
 Tested up to: 3.2.1
 Stable tag: 14
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
 
 == Description ==
-Speedy Smilies takes emoticons in WordPress to the next level (where it should be already and hopefully one day will). The end goal is to make smilies load faster in the browser for visitors and make them easy to insert into posts/pages for authors. In addition to the speed benefits, Speedy Smilies allows authors to easily change the appearance of emoticons using smilie sets.
+Speedy Smilies takes emoticons in WordPress to the next level (where it should be already and hopefully one day will). The end goal is to make smilies load faster in the browser for visitors and make them easy to insert into posts/pages for authors. In addition to the speed benefits, Speedy Smilies allows authors to easily change the appearance of emoticons using smiley sets.
 
 Speedy Smilies is free software licensed under the GNU GPL version 3.
 
@@ -21,7 +21,7 @@ Speedy Smilies is free software licensed under the GNU GPL version 3.
 
 == Screenshots ==
 
-1. Here we're looking at the control panel settings page for the plugin where you can select a smilie set.
+1. Here we're looking at the control panel settings page for the plugin where you can select a smiley set.
 2. An editing pane allows you to insert smilies into posts and pages simply by clicking on them.
 
 == Frequently Asked Questions ==
@@ -32,13 +32,15 @@ I'd love to hear your feedback. Please visit the [WordPress.org Forums for Speed
 
 = How do I create my own smilies sets? =
 
-As of Release 9, smilie sets are modular so you can add your own set of emoticons for use with the Speedy Smilies plugin. Each smilie set has a `.png` image and a `.php` file of the same name inside of the `sets/` directory.
+As of Release 9, smiley sets are modular so you can add your own set of emoticons for use with the Speedy Smilies plugin. As of Release 15, each smiley set has a `.png` image and a `.json` file of the same name inside of the `sets/` directory.
 
-At this time, there's no automated way to create the necessary PNG image and PHP file required for a smilie set, so your best bet is to learn by example. Let me know if a guided wizard to create new smilie sets is a feature that you'd like to see added in the future.
+At this time, there's no automated way to create the necessary PNG image and PHP file required for a smiley set, so your best bet is to learn by example. Let me know if a guided wizard to create new smiley sets is a feature that you'd like to see added in the future.
 
 == Changelog ==
 
 = Release 15 (7/24/2011) =
+* New minimum requirements: WordPress 3.0
+* Smiley sets now use the all-purpose [JSON](http://www.json.org/) format instead of a specialized PHP file.
 * Bug fix: CSS optimizer handles invalid selectors such as `,{` in the [Skeptical theme](http://www.woothemes.com/2010/09/skeptical/).
 * Bug fix: Upgrading the plugin or deleting the cached CSS file no longer ruins your blog's layout. The CSS is automatically regenerated whenever the cached file no longer exists.
 
@@ -47,8 +49,8 @@ At this time, there's no automated way to create the necessary PNG image and PHP
 
 = Release 13 (5/29/2011) =
 * Cached files created by the [WP Super Cache](http://wordpress.org/extend/plugins/wp-super-cache/) and [W3 Total Cache](http://wordpress.org/extend/plugins/w3-total-cache/) plugins are automatically cleared when Speedy Smilies regenerates the CSS.
-* The admin page now displays more information about each smilie set including image dimensions and filesize.
-* Added two new smilie sets (Diagona and Diagona Small).
+* The admin page now displays more information about each smiley set including image dimensions and filesize.
+* Added two new smiley sets (Diagona and Diagona Small).
 * Added `:heart:` emoticon to existing sets Silk and Fugue.
 
 = Release 12 (5/28/2011) =
@@ -63,10 +65,10 @@ At this time, there's no automated way to create the necessary PNG image and PHP
 
 = Release 9 (10/13/2009) =
 * In addition to regenerating the cached stylesheets when you switch to another theme, Speedy Smilies automatically regenerates the cache when it detects changes in the current theme's `style.css`. For added clarity, a notification is displayed inside of the admin control panel whenever Speedy Smilies regenerates the stylesheet.
-* Smilies sets are loaded dynamically instead of being hard-coded. Each smilie set has a `.png` image and a `.php` file of the same name inside of the `sets/` directory.
+* Smilies sets are loaded dynamically instead of being hard-coded. Each smiley set has a `.png` image and a `.php` file of the same name inside of the `sets/` directory.
 
 = Release 8 (9/30/2009) =
-* Added CSS caching. Instead of dynamically generating stylesheets via style.php on each visit, stylesheets are generated only once when changing the theme or smilie set. If you are using the Apache web server, the included `.htaccess` file in the `cache/` directory automatically serves these cached CSS files with appropriate Cache-Control: and Expires: HTTP headers.
+* Added CSS caching. Instead of dynamically generating stylesheets via style.php on each visit, stylesheets are generated only once when changing the theme or smiley set. If you are using the Apache web server, the included `.htaccess` file in the `cache/` directory automatically serves these cached CSS files with appropriate Cache-Control: and Expires: HTTP headers.
 
 = Release 7 (9/26/2009) =
 * Added a workaround for incompatible themes and plugins. When enabled, Speedy Smilies will add a second stylesheet to your blog, leaving your theme's stylesheet unchanged. The default behavior is to combine the CSS from your theme and the Speedy Smilies plugin into a single, minified CSS file.
@@ -85,7 +87,7 @@ At this time, there's no automated way to create the necessary PNG image and PHP
 * Added a basic check for incompatible plugins.
 * CSS is now minified as it passes through the Speedy Smilies plugin to yield faster download and rendering times for visitors.
 * Improved the plugin's control panel settings page and added a sample text box to preview smilies (see screenshot).
-* Added two new smilie sets (WordPress Default, in case anyone actually likes the smilies that ship with WordPress, and Moskis).
+* Added two new smiley sets (WordPress Default, in case anyone actually likes the smilies that ship with WordPress, and Moskis).
 
 = Release 2 (7/9/2009) =
 * First public release!

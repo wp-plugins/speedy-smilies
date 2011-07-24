@@ -1,12 +1,10 @@
 <?php
 /*
+Speedy Smilies
+Copyright 2011 Nick Venturella
 
-    Speedy Smilies
-    Copyright 2011 Nick Venturella
-
-    Speedy Smilies is free software licensed under the GNU GPL version 3.
-    See the plugin's main file, speedy-smilies.php, for full details.
-
+Speedy Smilies is free software licensed under the GNU GPL version 3.
+See the plugin's main file, speedy-smilies.php, for full details.
 */
 
 
@@ -35,8 +33,7 @@ function q_smilies_init() {
 	// Don't bother setting up smilies if they are disabled
 	if (!get_option('use_smilies')) return;
 
-	$toeval = 'return array( ' . file_get_contents(plugin_dir_path(__FILE__) . "sets/$q_smilies_set.php") . ');';
-	$set_array = eval($toeval);
+	$set_array = json_decode(file_get_contents( plugin_dir_path(__FILE__) . "sets/$q_smilies_set.json" ));
 	$q_smilies_width = $set_array['width'];
 	$q_smilies_height = $set_array['height'];
 	$q_smilies_positions = $set_array['map'];
@@ -44,15 +41,15 @@ function q_smilies_init() {
 
 	foreach ($q_smilies_positions as $smiley => $position) {
 		$alt = attribute_escape($smiley);
-		$q_smilies_search[] = '/(\s|^)' . preg_quote( $smiley, '/' ) . '(\s|$)/';		
+		$q_smilies_search[] = '/(\s|^)' . preg_quote( $smiley, '/' ) . '(\s|$)/';
 		$q_smilies_replace[] = " <img src='" . includes_url() . "images/blank.gif' alt='$alt' class='wp-smiley smiley-$position' /> ";
 	}
-	
+
 	// Rebuild the CSS if it does not exist
 	$cache = get_option('speedy_smilies_cache');
 	if (!$cache) q_smilies_rebuild();
 	else {
-		$cssfile = plugin_dir_url(__FILE__) . 'cache/' . $cache . '.css';
+		$cssfile = plugin_dir_path(__FILE__) . 'cache/' . $cache . '.css';
 		if (!is_file($cssfile)) q_smilies_rebuild();
 	}
 }
@@ -71,7 +68,7 @@ function q_smilies_admin_menu() {
 /**
  * Admin: Runs when the "edit post" page loads.
  * Called by add_action('add_meta_boxes').
- * 
+ *
  * @uses WordPress 3.0+
  */
 function q_smilies_admin_meta() {
@@ -89,11 +86,11 @@ function q_smilies_admin_meta() {
 function q_smilies_meta_box() {
 	global $q_smilies_positions;
 	if(empty($q_smilies_positions)) return;
-	
+
 	// array_flip: "If a value has several occurrences, the latest key will be used as its values, and all others will be lost."
 	// This means the WordPress default for each smiley should be the LAST key defined in the map.
 	$flip = array_flip($q_smilies_positions);
-	
+
 	foreach ($flip as $position => $smiley) {
 		$alt = attribute_escape($smiley);
 		print " <a class='smiley' href='#' onclick='q_smilies_insert(\" $alt \");'><img src='" . includes_url() . "images/blank.gif' alt='$alt' class='wp-smiley smiley-$position' /></a> ";
@@ -104,7 +101,7 @@ function q_smilies_meta_box() {
 
 /**
  * Admin: Add JavaScript and CSS to the edit pages.
- * Called by add_action('admin_print_styles-edit.php').
+ * Called by add_action('admin_print_styles').
  */
 function q_smilies_admin_styles() {
 	// Rebuild the CSS if it is outdated
@@ -112,7 +109,7 @@ function q_smilies_admin_styles() {
 	$cssstat = stat($cssfile);
 	if (get_option('speedy_smilies_themecache') !== $cssstat['size'] . '-' . $cssstat['mtime'] . '-' . $cssstat['ino']) q_smilies_rebuild();
 	unset($cssstat);
-	
+
 	$pluginurl = plugin_dir_url(__FILE__);
 	$css = <<<CSS
 .q_smilies_form fieldset {
@@ -174,10 +171,11 @@ a.smiley {
 }
 
 .q_smilies_help {
-	float: right;
-	margin: 24px -18px 0 0;
+	position: absolute;
+	right: 25px;
+	margin: 25px 0 0;
 	padding-right: 18px;
-	font-size: 9px;
+	font-size: 10px;
 	line-height: 11px;
 	background: url(${pluginurl}helparrow.png) no-repeat center right;
 	text-align: right;
@@ -190,7 +188,7 @@ a.smiley {
 }
 CSS;
 	$css = q_smilies_css_optimize($css);
-	
+
 	print <<<HTML
 <!-- Begin Speedy Smilies plugin admin -->
 <script type='text/javascript' src='{$pluginurl}admin.js'></script>
@@ -224,7 +222,7 @@ function q_smilies_stylesheet_head() {
 /**
  * Per-page: Return the Speedy Smilies CSS URL.
  * Called by add_filter('stylesheet_uri') when method = fast.
- * 
+ *
  * @return The URL to the Speedy Smilies CSS file.
  */
 function q_smilies_stylesheet_uri() {
@@ -255,7 +253,7 @@ function q_smilies_compatibility_check() {
 /**
  * Per-page: Replace text smilies with HTML <img> tags.
  * Called by add_filter('the_content'), add_filter('the_excerpt'), add_filter('comment_text').
- * 
+ *
  * @param string $text The text
  * @return string The text with smilies converted to HTML <img> tags.
  */
@@ -280,13 +278,13 @@ function q_smilies_replace($text) {
 
 /**
  * Rebuild the CSS files.
- * Called by add_action('switch_theme'), q_smilies_init(), 
- * 
- * @param boolean $donotify Whether to display a notification in the admin control panel. 
+ * Called by add_action('switch_theme'), q_smilies_init(),
+ *
+ * @param boolean $donotify Whether to display a notification in the admin control panel.
  */
 function q_smilies_rebuild($donotify = true) {
 	global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
-	
+
 	// Save the stat info for the theme's CSS to auto-detect changes later
 	$cssfile = get_stylesheet_directory() . '/style.css';
 	$cssstat = stat($cssfile);
@@ -323,14 +321,14 @@ function q_smilies_rebuild($donotify = true) {
 CSS;
 	foreach (array_unique($q_smilies_positions) as $smiley => $position)
 	$smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
-	
+
 	// Compress and optimize CSS
 	$css = q_smilies_css_optimize($css);
 	$smiliescss = q_smilies_css_optimize($smiliescss);
 
 	// Delete old CSS files
 	$dir = plugin_dir_path(__FILE__);
-	if (is_dir("{$dir}cache")) {	
+	if (is_dir("{$dir}cache")) {
 		$oldcache = get_option('speedy_smilies_cache');
 		if($oldcache) {
 			@unlink("{$dir}cache/{$oldcache}.css");
@@ -359,7 +357,7 @@ CSS;
 /**
  * Optimize CSS by removing comments and whitespace.
  * Called by q_smilies_rebuild(), q_smilies_admin_styles(), q_smilies_init().
- * 
+ *
  * @param string $css The CSS to optimize.
  * @return string The optimized CSS.
  */
@@ -370,35 +368,34 @@ function q_smilies_css_optimize($css) {
 	// Delete unnecessary spaces
 	$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
 	$css = preg_replace('!\s+!', " ", $css);
-	
+
 	// Delete trailing semicolons
 	$css = preg_replace('!;}!', "}", $css);
-	
+
 	// Fix broken stylesheets. The last character of a selector must be one of: a-z 0-9 * ) ]
 	$css = preg_replace('![^a-z0-9*)\]]+{!i', "{", $css);
-	
+
 	// Delete unnecessary measurements
 	$css = preg_replace('!([: ])0(%|cm|em|ex|in|mm|pc|pt|px)!i', "\${1}0", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \1 \1!iU', ":$1", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \2!iU', ":$1 $2", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \2!iU', ":$1 $2 $3", $css);
-	
+
 	return $css;
 }
 
 
 /**
- * Admin: List the smiley sets.
- * 
- * @return array Array of smiley sets.
+ * Admin: List all the smiley sets.
+ *
+ * @return array List of smiley sets.
  */
 function q_smilies_list_sets() {
 	$list = array();
-	foreach (glob(plugin_dir_path(__FILE__) . "sets/*.php") as $set) {
-		$setpng = str_replace('.php', '.png', $set);
-		$toeval = 'return array( ' . str_replace(';', '', file_get_contents($set)) . ');';
-		$set_array = eval($toeval);
-		$list[basename($set, '.php')] = array('name' => $set_array['name'], 'authors' => $set_array['authors'], 'dimensions' => "{$set_array['width']}x{$set_array['height']}", 'bytes' => filesize($setpng));
+	foreach (glob(plugin_dir_path(__FILE__) . "sets/*.json") as $set) {
+		$basename = basename($set, '.json');
+		$set_array = json_decode(file_get_contents($set));
+		$list[$basename] = array('name' => $set_array['name'], 'authors' => $set_array['authors'], 'dimensions' => "{$set_array['width']}x{$set_array['height']}", 'bytes' => filesize("$basename.png"));
 	}
 	return $list;
 }
@@ -406,7 +403,7 @@ function q_smilies_list_sets() {
 
 /**
  * Admin: Convert an array of authors to HTML tags.
- * 
+ *
  * @param array $a The author array.
  * @return string The author HTML.
  */
@@ -422,7 +419,7 @@ function q_smilies_authors($a) {
 
 /**
  * Admin: Generate random sample text.
- * 
+ *
  * @return string The sample text
  */
 function q_smilies_sample_text() {
@@ -450,8 +447,8 @@ function q_smilies_sample_text() {
 		"Salve"			=> " <em>and</em> you can greet friends in Latin!",
 		"Merhaba"		=> " <em>and</em> you can greet friends in Turkish!",
 		"Bula"			=> " <em>and</em> you can greet friends in Fijian!"
-	);
-	$greeting = array_rand($greetings);
+		);
+		$greeting = array_rand($greetings);
 
-	return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. 8) All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! <3</p>";
+		return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. 8) All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! <3</p>";
 }

@@ -1,31 +1,28 @@
 <?php
 /*
- Plugin Name: Speedy Smilies
- Plugin URI: http://quietmint.com/speedy-smilies/
- Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
- Author: Nick Venturella
- Version: 14
- Author URI: http://quietmint.com/
+Plugin Name: Speedy Smilies
+Plugin URI: http://quietmint.com/speedy-smilies/
+Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
+Author: Nick Venturella
+Version: 15
+Author URI: http://quietmint.com/
 
+Speedy Smilies
+Copyright 2011 Nick Venturella
 
- Speedy Smilies
- Copyright 2011 Nick Venturella
+Speedy Smilies is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
- Speedy Smilies is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+Speedy Smilies is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- Speedy Smilies is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with Speedy Smilies.  If not, see <http://www.gnu.org/licenses/>.
-
-
- */
+You should have received a copy of the GNU General Public License
+along with Speedy Smilies.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 
 global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions, $q_smilies_search, $q_smilies_replace;
@@ -45,7 +42,9 @@ register_activation_hook(__FILE__, 'q_smilies_activate');
 add_action('init', 'q_smilies_init', 5);
 add_action('admin_menu', 'q_smilies_admin_menu');
 add_action('add_meta_boxes', 'q_smilies_admin_meta');
-add_action('admin_print_styles-edit.php', 'q_smilies_admin_styles');
+add_action('admin_print_styles-speedy-smilies/admin.php', 'q_smilies_admin_styles');
+add_action('admin_print_styles-post.php', 'q_smilies_admin_styles');
+add_action('admin_print_styles-post-new.php', 'q_smilies_admin_styles');
 if (get_option('speedy_smilies_donotify') === 'yes') add_action('admin_notices', 'q_smilies_rebuild_notify');
 add_filter('the_content', 'q_smilies_replace');
 add_filter('the_excerpt', 'q_smilies_replace');
