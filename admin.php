@@ -9,62 +9,6 @@
 
 */
 
-
-// List the smilie sets
-function q_smilies_list_sets() {
-	$list = array();
-	foreach (glob(plugin_dir_path(__FILE__) . "sets/*.php") as $set) {
-		$setpng = str_replace('.php', '.png', $set);
-		$toeval = 'return array( ' . str_replace(';', '', file_get_contents($set)) . ');';
-		$set_array = eval($toeval);
-		$list[basename($set, '.php')] = array('name' => $set_array['name'], 'authors' => $set_array['authors'], 'dimensions' => "{$set_array['width']}x{$set_array['height']}", 'bytes' => filesize($setpng));
-	}
-	return $list;
-}
-
-function q_smilies_authors($a) {
-	$uris = array();
-	foreach ($a as $name => $uri) { if($uri) $uris[] = "<a href=\"$uri\" target=\"_blank\">$name</a>"; else $uris[] = "$name"; }
-	$last = array_pop($uris);
-	if (count($uris) == 0) return $last;
-	elseif (count($uris) == 1) return $uris[0] . ' and ' . $last;
-	else return join(', ', $uris) . ' and ' . $last;
-}
-
-
-// Generate sample text
-function q_smilies_sample_text() {
-	global $q_smilies_set, $user_identity;
-	$greetings = array(
-		"Hi"			=> ".",
-		"Hello"			=> ".",
-		"Salut"			=> " <em>and</em> you can greet friends in French!",
-		"Ciao"			=> " <em>and</em> you can greet friends in Italian!",
-		"Aloha"			=> " <em>and</em> you can greet friends in Hawaiian!",
-		"G'day"			=> " <em>and</em> you can greet the Aussies!",
-		"Ni hao" 		=> " <em>and</em> you can greet friends in Chinese!",
-		"Konnichiwa"		=> " <em>and</em> you can greet friends in Japanese!",
-		"Ahoy hoy"		=> " <em>and</em> you can greet sailors! In fact, this nautical greeting so infatuated inventor Alexander Graham Bell he suggested this be the proper way to answer the telephone; try it the next time someone gives you a call.",
-		"Jambo"			=> " <em>and</em> you can greet friends in Swahili!",
-		"Namaste"		=> " <em>and</em> you can greet friends in Hindi!",
-		"Sawubona"		=> " <em>and</em> you can greet friends in Zulu!",
-		"Hej"			=> " <em>and</em> you can greet friends in Swedish and Danish!",
-		"Hei"			=> " <em>and</em> you can greet friends in Norwegian!",
-		"Mingalarba"		=> " <em>and</em> you can greet friends in Burmese!",
-		"Hola"			=> " <em>and</em> you can greet friends in Spanish!",
-		"Privyet"		=> " <em>and</em> you can greet friends in Russian!",
-		"Moi"			=> " <em>and</em> you can greet friends in Finnish!",
-		"Annyong"		=> " <em>and</em> you can greet friends in Korean!",
-		"Salve"			=> " <em>and</em> you can greet friends in Latin!",
-		"Merhaba"		=> " <em>and</em> you can greet friends in Turkish!",
-		"Bula"			=> " <em>and</em> you can greet friends in Fijian!"
-	);
-	$greeting = array_rand($greetings);
-
-	return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. 8) All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! <3</p>";
-}
-
-
 // Check for incompatible plugins
 q_smilies_compatibility_check();
 
