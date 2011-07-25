@@ -369,7 +369,7 @@ function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
 	$css = preg_replace('!\s+!', " ", $css);
 	
 	// Delete unnecessay quotes for url()s
-	$css = preg_replace('!url\((["\'])(.*)\1\)!i', "url($2)", $css);
+	$css = preg_replace('!url\(["\']?(.*?)["\']?\)!i', "url($1)", $css);
 
 	// Delete trailing semicolons
 	$css = preg_replace('!;}!', "}", $css);
@@ -420,7 +420,7 @@ function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
 		$css = preg_replace('!(.+)(@import .*?;)!is', "$2$1", $css);
 		
 		// Rewrite relative URLs
-		$css = preg_replace('~url\((?!/|data:|https?:)(.*)\)~i', "url($base_url/$1)", $css);
+		$css = preg_replace('~url\((?!/|data:|https?:)(.*?)\)~i', "url($base_url/$1)", $css);
 	}
 	
 	return trim($css);
@@ -439,11 +439,11 @@ function q_smilies_list_sets() {
 		$setname = basename($set, '.json');
 		$set_array = json_decode(file_get_contents($set), true);
 		$list[$setname] = array(
-			'name' => $set_array['name'],
-			'authors' => $set_array['authors'],
-			'width' => floor($set_array['width']),
-			'height' => floor($set_array['height']),
-			'bytes' => filesize("$basename.png"),
+			'name'		=> $set_array['name'],
+			'authors'	=> $set_array['authors'],
+			'width'		=> floor($set_array['width']),
+			'height'	=> floor($set_array['height']),
+			'bytes'		=> filesize("$basename.png"),
 		);
 	}
 	return $list;
@@ -481,14 +481,14 @@ function q_smilies_sample_text() {
 		"Aloha"			=> " <em>and</em> you can greet friends in Hawaiian!",
 		"G'day"			=> " <em>and</em> you can greet the Aussies!",
 		"Ni hao" 		=> " <em>and</em> you can greet friends in Chinese!",
-		"Konnichiwa"		=> " <em>and</em> you can greet friends in Japanese!",
+		"Konnichiwa"	=> " <em>and</em> you can greet friends in Japanese!",
 		"Ahoy hoy"		=> " <em>and</em> you can greet sailors! In fact, this nautical greeting so infatuated inventor Alexander Graham Bell he suggested this be the proper way to answer the telephone; try it the next time someone gives you a call.",
 		"Jambo"			=> " <em>and</em> you can greet friends in Swahili!",
 		"Namaste"		=> " <em>and</em> you can greet friends in Hindi!",
 		"Sawubona"		=> " <em>and</em> you can greet friends in Zulu!",
 		"Hej"			=> " <em>and</em> you can greet friends in Swedish and Danish!",
 		"Hei"			=> " <em>and</em> you can greet friends in Norwegian!",
-		"Mingalarba"		=> " <em>and</em> you can greet friends in Burmese!",
+		"Mingalarba"	=> " <em>and</em> you can greet friends in Burmese!",
 		"Hola"			=> " <em>and</em> you can greet friends in Spanish!",
 		"Privyet"		=> " <em>and</em> you can greet friends in Russian!",
 		"Moi"			=> " <em>and</em> you can greet friends in Finnish!",

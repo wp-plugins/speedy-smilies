@@ -63,8 +63,7 @@ foreach ($q_smilies_sets as $set => $a) {
 	<input type="radio" name="speedy_smilies_set" value="$set" $checked_this $disasbled_this />
 	$label_this<br />
 	$img_this
-</label>
-<br />
+</label><br />
 HTML;
 }
 
