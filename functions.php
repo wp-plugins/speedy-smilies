@@ -33,7 +33,7 @@ function q_smilies_init() {
 	// Don't bother setting up smilies if they are disabled
 	if (!get_option('use_smilies')) return;
 
-	$set_array = json_decode(file_get_contents( plugin_dir_path(__FILE__) . "sets/$q_smilies_set.json" ));
+	$set_array = json_decode(file_get_contents( plugin_dir_path(__FILE__) . "sets/$q_smilies_set.json" ), true);
 	$q_smilies_width = $set_array['width'];
 	$q_smilies_height = $set_array['height'];
 	$q_smilies_positions = $set_array['map'];
@@ -172,8 +172,8 @@ a.smiley {
 
 .q_smilies_help {
 	position: absolute;
-	right: 25px;
-	margin: 25px 0 0;
+	right: 58px;
+	margin: 24px 0 0;
 	padding-right: 18px;
 	font-size: 10px;
 	line-height: 11px;
@@ -293,11 +293,8 @@ function q_smilies_rebuild($donotify = true) {
 
 	// Load the theme's CSS
 	$css = file_get_contents($cssfile);
-	$directory = get_stylesheet_directory_uri();
-
-	// Rewrite relative URLs in theme CSS
-	$css = preg_replace('!url\(\s?\'?"?(.+?)\'?"?\s?\)!', "url(\\1)", $css);
-	$css = preg_replace('!url\(([^/].+?)\)!', "url($directory/\\1)", $css);
+	$base_url = get_stylesheet_directory_uri();
+	$base_path = get_stylesheet_directory();
 
 	// Embed the image with a data: URI?
 	$includedimage = $q_smilies_src;
@@ -323,7 +320,7 @@ CSS;
 	$smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
 
 	// Compress and optimize CSS
-	$css = q_smilies_css_optimize($css);
+	$css = q_smilies_css_optimize($css, $base_url, $base_path);
 	$smiliescss = q_smilies_css_optimize($smiliescss);
 
 	// Delete old CSS files
@@ -356,22 +353,27 @@ CSS;
 
 /**
  * Optimize CSS by removing comments and whitespace.
- * Called by q_smilies_rebuild(), q_smilies_admin_styles(), q_smilies_init().
+ * Called by q_smilies_rebuild(), q_smilies_admin_styles().
  *
  * @param string $css The CSS to optimize.
+ * @param string $base_url The base URL for relative links (or null to leave relative links unchanged).
+ * @param string $base_path The file path represented by the base URL.
  * @return string The optimized CSS.
  */
-function q_smilies_css_optimize($css) {
+function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
 	// Delete comments
 	$css = preg_replace('!/\*.*?\*/!s', "", $css);
 
 	// Delete unnecessary spaces
 	$css = preg_replace('!\s*([;:{},])\s*!', "$1", $css);
 	$css = preg_replace('!\s+!', " ", $css);
+	
+	// Delete unnecessay quotes for url()s
+	$css = preg_replace('!url\((["\'])(.*)\1\)!i', "url($2)", $css);
 
 	// Delete trailing semicolons
 	$css = preg_replace('!;}!', "}", $css);
-
+	
 	// Fix broken stylesheets. The last character of a selector must be one of: a-z 0-9 * ) ]
 	$css = preg_replace('![^a-z0-9*)\]]+{!i', "{", $css);
 
@@ -380,8 +382,48 @@ function q_smilies_css_optimize($css) {
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \1 \1!iU', ":$1", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \2!iU', ":$1 $2", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \2!iU', ":$1 $2 $3", $css);
+	
+	if($base_url) {
+		// Recursively inline relative @import statements
+		if (preg_match_all('!@import (.*?);!i', $css, $imports)) {
+			foreach($imports[1] as $i) {
+				preg_match('!^(?:"|\'|url\()(.*)(?:"|\'|\))(.*)$!i', $i, $matches);
+				
+				// Get the @import's URL and base directory
+				$url = $matches[1];
 
-	return $css;
+				// Skip @import URLs that are absolute
+				if (preg_match('!^(/|data:|https?:)!i', $url)) continue;
+
+				// Determine the base URL and base path of the @import.
+				$import_base_url = dirname("$base_url/$url");
+				$import_base_path = dirname(realpath("$base_path/$url"));
+				
+				// Get the @import's media selector
+				$media = preg_replace('!\s*([;:{},])\s*!', "$1", $matches[2]);
+				$media = trim(preg_replace('!\s+!', " ", $media));
+				
+				// Read the @import file and optimize it
+				$css_import = '';
+				if($import_base_path) $css_import = @file_get_contents("$base_path/$url");
+				if($css_import) {
+					$css_import = q_smilies_css_optimize($css_import, $import_base_url, $import_base_path);
+					if ($media) $css_import = "@media $media{{$css_import}}";
+				}
+
+				// Replace the @import statement with the optimized CSS
+				$css = preg_replace('!@import ' . preg_quote($i, '!') . ';!i', $css_import, $css, 1);
+			}
+		}
+		
+		// Move remaining [absolute] @import statements to the beginning
+		$css = preg_replace('!(.+)(@import .*?;)!is', "$2$1", $css);
+		
+		// Rewrite relative URLs
+		$css = preg_replace('~url\((?!/|data:|https?:)(.*)\)~i', "url($base_url/$1)", $css);
+	}
+	
+	return trim($css);
 }
 
 
@@ -393,9 +435,16 @@ function q_smilies_css_optimize($css) {
 function q_smilies_list_sets() {
 	$list = array();
 	foreach (glob(plugin_dir_path(__FILE__) . "sets/*.json") as $set) {
-		$basename = basename($set, '.json');
-		$set_array = json_decode(file_get_contents($set));
-		$list[$basename] = array('name' => $set_array['name'], 'authors' => $set_array['authors'], 'dimensions' => "{$set_array['width']}x{$set_array['height']}", 'bytes' => filesize("$basename.png"));
+		$basename = str_replace('.json', '', $set);
+		$setname = basename($set, '.json');
+		$set_array = json_decode(file_get_contents($set), true);
+		$list[$setname] = array(
+			'name' => $set_array['name'],
+			'authors' => $set_array['authors'],
+			'width' => floor($set_array['width']),
+			'height' => floor($set_array['height']),
+			'bytes' => filesize("$basename.png"),
+		);
 	}
 	return $list;
 }

@@ -50,7 +50,7 @@ if (!$q_smilies_set) $q_smilies_set = 'wordpress';
 
 // List each smiley set
 foreach ($q_smilies_sets as $set => $a) {
-	$label_this = "<strong>{$a['name']}:</strong> <span class='q_smilies_small'>{$a['dimensions']} &mdash; "
+	$label_this = "<strong>{$a['name']}:</strong> <span class='q_smilies_small'>{$a['width']}x{$a['height']} &mdash; "
 		. number_format($a['bytes']) . ' bytes'
 		. ($a['authors'] ? ' &mdash; by ' . q_smilies_authors($a['authors']) : '')
 		. '</span>';
@@ -64,7 +64,7 @@ foreach ($q_smilies_sets as $set => $a) {
 	$label_this<br />
 	$img_this
 </label>
-<br /><br />
+<br />
 HTML;
 }
 
