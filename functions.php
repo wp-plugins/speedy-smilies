@@ -284,6 +284,20 @@ function q_smilies_replace($text) {
  */
 function q_smilies_rebuild($donotify = true) {
 	global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions;
+	
+	// Delete old CSS files
+	$dir = plugin_dir_path(__FILE__);
+	if (is_dir("{$dir}cache")) {
+		$oldcache = get_option('speedy_smilies_cache');
+		if($oldcache) {
+			@unlink("{$dir}cache/{$oldcache}.css");
+			@unlink("{$dir}cache/{$oldcache}_standalone.css");
+		}
+	} else { @mkdir("{$dir}cache"); }
+	
+	// Create the CSS file immediately (mitigates concurrent rebuilds)
+	$newcache = microtime(1);
+	@touch("{$dir}cache/{$newcache}.css");
 
 	// Save the stat info for the theme's CSS to auto-detect changes later
 	$cssfile = get_stylesheet_directory() . '/style.css';
@@ -323,18 +337,7 @@ CSS;
 	$css = q_smilies_css_optimize($css, $base_url, $base_path);
 	$smiliescss = q_smilies_css_optimize($smiliescss);
 
-	// Delete old CSS files
-	$dir = plugin_dir_path(__FILE__);
-	if (is_dir("{$dir}cache")) {
-		$oldcache = get_option('speedy_smilies_cache');
-		if($oldcache) {
-			@unlink("{$dir}cache/{$oldcache}.css");
-			@unlink("{$dir}cache/{$oldcache}_standalone.css");
-		}
-	} else { @mkdir("{$dir}cache"); }
-
 	// Save new CSS files
-	$newcache = microtime(1);
 	file_put_contents("{$dir}cache/{$newcache}.css", $css . $smiliescss);
 	file_put_contents("{$dir}cache/{$newcache}_standalone.css", $smiliescss);
 	update_option('speedy_smilies_cache', $newcache);
@@ -382,33 +385,38 @@ function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \1 \1!iU', ":$1", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \2!iU', ":$1 $2", $css);
 	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \2!iU', ":$1 $2 $3", $css);
-	
+
 	if($base_url) {
 		// Recursively inline relative @import statements
 		if (preg_match_all('!@import (.*?);!i', $css, $imports)) {
+			$leftovers = '';
 			foreach($imports[1] as $i) {
 				preg_match('!^(?:"|\'|url\()(.*)(?:"|\'|\))(.*)$!i', $i, $matches);
 				
 				// Get the @import's URL and base directory
 				$url = $matches[1];
 
-				// Skip @import URLs that are absolute
-				if (preg_match('!^(/|data:|https?:)!i', $url)) continue;
-
-				// Determine the base URL and base path of the @import.
-				$import_base_url = dirname("$base_url/$url");
-				$import_base_path = dirname(realpath("$base_path/$url"));
-				
-				// Get the @import's media selector
-				$media = preg_replace('!\s*([;:{},])\s*!', "$1", $matches[2]);
-				$media = trim(preg_replace('!\s+!', " ", $media));
-				
-				// Read the @import file and optimize it
 				$css_import = '';
-				if($import_base_path) $css_import = @file_get_contents("$base_path/$url");
-				if($css_import) {
-					$css_import = q_smilies_css_optimize($css_import, $import_base_url, $import_base_path);
-					if ($media) $css_import = "@media $media{{$css_import}}";
+				if (!preg_match('!^(/|data:|https?:)!i', $url)) {
+					// Determine the base URL and base path of the @import.
+					$import_base_url = dirname("$base_url/$url");
+					$import_base_path = dirname(realpath("$base_path/$url"));
+					
+					// Get the @import's media selector
+					$media = preg_replace('!\s*([;:{},])\s*!', "$1", $matches[2]);
+					$media = trim(preg_replace('!\s+!', " ", $media));
+					
+					// Read the @import file and optimize it
+					$css_import = '';
+					if($import_base_path) $css_import = @file_get_contents("$base_path/$url");
+					if($css_import) {
+						$css_import = q_smilies_css_optimize($css_import, $import_base_url, $import_base_path);
+						if ($media) $css_import = "@media $media{{$css_import}}";
+					}
+
+				} else {
+					// Do nothing, but move the leftover @import statement to the beginning
+					$leftovers .= '@import ' . $i . ';';
 				}
 
 				// Replace the @import statement with the optimized CSS
@@ -417,7 +425,7 @@ function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
 		}
 		
 		// Move remaining [absolute] @import statements to the beginning
-		$css = preg_replace('!(.+)(@import .*?;)!is', "$2$1", $css);
+		$css = $leftovers . $css;
 		
 		// Rewrite relative URLs
 		$css = preg_replace('~url\((?!/|data:|https?:)(.*?)\)~i', "url($base_url/$1)", $css);
