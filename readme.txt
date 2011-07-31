@@ -4,7 +4,7 @@ Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smilie, smiles, smile, emoticons, emoticon, emotes, emote, css, css sprite, css sprites, css image sprite, css image sprites, image sprite, image sprites, css minification, css compression, css optimization
 Requires at least: 3.0
 Tested up to: 3.2.1
-Stable tag: 15
+Stable tag: 16
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
 
@@ -38,7 +38,11 @@ At this time, there's no automated way to create the necessary PNG image and PHP
 
 == Changelog ==
 
-= Release 15 (7/24/2011) =
+= Release 16 (7/30/2011) =
+* Reduced memory usage
+* CSS optimizer shortens hexadecimal color names when possible (e.g., from `#ffcc00` to `#fc0`)
+
+= Release 15 (7/25/2011) =
 * New minimum requirements: WordPress 3.0
 * Smiley sets now use the all-purpose [JSON](http://www.json.org/) format instead of a specialized PHP file.
 * [[via report](http://wordpress.org/support/topic/plugin-speedy-smilies-possible-to-add-support-for-child-themes)] `@import` statements referencing local CSS files are replaced with the contents of the file. The imported file is also optimized.

@@ -38,6 +38,7 @@ function q_smilies_init() {
 	$q_smilies_height = $set_array['height'];
 	$q_smilies_positions = $set_array['map'];
 	$q_smilies_src = plugin_dir_url(__FILE__) . "sets/$q_smilies_set.png";
+	unset($set_array);
 
 	foreach ($q_smilies_positions as $smiley => $position) {
 		$alt = attribute_escape($smiley);
@@ -295,7 +296,7 @@ function q_smilies_rebuild($donotify = true) {
 		}
 	} else { @mkdir("{$dir}cache"); }
 	
-	// Create the CSS file immediately (mitigates concurrent rebuilds)
+	// Create a blank CSS file immediately (mitigates concurrent rebuilds)
 	$newcache = microtime(1);
 	@touch("{$dir}cache/{$newcache}.css");
 
@@ -305,16 +306,10 @@ function q_smilies_rebuild($donotify = true) {
 	update_option('speedy_smilies_themecache', $cssstat['size'] . '-' . $cssstat['mtime'] . '-' . $cssstat['ino']);
 	unset($cssstat);
 
-	// Load the theme's CSS
-	$css = file_get_contents($cssfile);
-	$base_url = get_stylesheet_directory_uri();
-	$base_path = get_stylesheet_directory();
-
 	// Embed the image with a data: URI?
 	$includedimage = $q_smilies_src;
 	if(get_option('speedy_smilies_datauri') == 'yes') {
-		$imagebase64 = base64_encode(file_get_contents( dirname(__FILE__) . "/sets/$q_smilies_set.png" ));
-		$includedimage = 'data:image/png;base64,' . $imagebase64;
+		$includedimage = 'data:image/png;base64,' . base64_encode(file_get_contents( dirname(__FILE__) . "/sets/$q_smilies_set.png" ));
 	}
 
 	// Generate Speedy Smilies CSS
@@ -330,19 +325,26 @@ function q_smilies_rebuild($donotify = true) {
 	width: {$q_smilies_width}px !important;
 }
 CSS;
+	unset($includedimage);
 	foreach (array_unique($q_smilies_positions) as $smiley => $position)
 	$smiliescss .= ".wp-smiley.smiley-$position{background-position:" . ($position - 1) * $q_smilies_width * -1 . "px!important}";
 
-	// Compress and optimize CSS
-	$css = q_smilies_css_optimize($css, $base_url, $base_path);
+	// Optimize Speedy Smilies CSS
 	$smiliescss = q_smilies_css_optimize($smiliescss);
+	
+	// Load the theme's CSS and optimize it
+	$base_url = get_stylesheet_directory_uri();
+	$base_path = get_stylesheet_directory();
+	$css = q_smilies_css_optimize(file_get_contents($cssfile), $base_url, $base_path);
 
 	// Save new CSS files
 	file_put_contents("{$dir}cache/{$newcache}.css", $css . $smiliescss);
 	file_put_contents("{$dir}cache/{$newcache}_standalone.css", $smiliescss);
 	update_option('speedy_smilies_cache', $newcache);
+	unset($css);
+	unset($smiliescss);
 
-	// Clear cache if WP Super Cache or W3 Total Cache plugins are running
+	// Clear WP Super Cache and W3 Total Cache if these plugins are running
 	if (function_exists('wp_cache_clear_cache')) wp_cache_clear_cache();
 	if (function_exists('w3tc_pgcache_flush')) w3tc_pgcache_flush();
 
@@ -363,7 +365,7 @@ CSS;
  * @param string $base_path The file path represented by the base URL.
  * @return string The optimized CSS.
  */
-function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
+function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {	
 	// Delete comments
 	$css = preg_replace('!/\*.*?\*/!s', "", $css);
 
@@ -382,9 +384,13 @@ function q_smilies_css_optimize($css, $base_url = null, $base_path = null) {
 
 	// Delete unnecessary measurements
 	$css = preg_replace('!([: ])0(%|cm|em|ex|in|mm|pc|pt|px)!i', "\${1}0", $css);
-	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \1 \1!iU', ":$1", $css);
-	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \2!iU', ":$1 $2", $css);
-	$css = preg_replace('!:([0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) ([0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \2!iU', ":$1 $2 $3", $css);
+	$css = preg_replace('!:(-?[0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \1 \1!iU', ":$1", $css);
+	$css = preg_replace('!:(-?[0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) (-?[0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \1 \2!iU', ":$1 $2", $css);
+	$css = preg_replace('!:(-?[0-9]+(?:\.[0-9]*)?+(?:%|cm|em|ex|in|mm|pc|pt|px)?) (-?[0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) (-?[0-9]+(?:\.[0-9]*)?(?:%|cm|em|ex|in|mm|pc|pt|px)?) \2!iU', ":$1 $2 $3", $css);
+	
+	// Shorten hex colors, and replace "#f00" with the shorter named color "red"
+	$css = preg_replace('!#([[:xdigit:]])\1([[:xdigit:]])\2([[:xdigit:]])\3!i', "#$1$2$3", $css);
+	$css = preg_replace('!#f00!i', "red", $css);
 
 	if($base_url) {
 		// Recursively inline relative @import statements
@@ -504,8 +510,9 @@ function q_smilies_sample_text() {
 		"Salve"			=> " <em>and</em> you can greet friends in Latin!",
 		"Merhaba"		=> " <em>and</em> you can greet friends in Turkish!",
 		"Bula"			=> " <em>and</em> you can greet friends in Fijian!"
-		);
-		$greeting = array_rand($greetings);
+	);
+	$greeting = array_rand($greetings);
+	unset($greetings);
 
-		return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. 8) All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! <3</p>";
+	return "<p>$greeting, $user_identity! :p In case you were wondering, :?: you&apos;re looking at some <em>fancy fresh</em> sample text. Oh my! :eek:</p><p>The sun broke quickly over the endless African savanna beginning another clear day. 8) All was quiet save a marimba playing in the distance. :roll: James closed his eyes and began daydreaming. ;-) Suddenly, pieces of broken glass were flying through the air in all directions. :shock: With a thunderous crash, his Jeep bounded out of the underbrush. :lol: </p><p>&quot;Although it is always an adventure,&quot; :| James mused, &quot;this is the last time I let the monkey drive!&quot; :mad: He laced his boots, grabbed his gun, and ran out the door... :s</p><p>:arrow: Now you know how the smilies on your blog will appear{$greetings[$greeting]} :) What a lovely plugin this Speedy Smilies is! <3</p>";
 }
