@@ -4,7 +4,7 @@ Plugin Name: Speedy Smilies
 Plugin URI: http://quietmint.com/speedy-smilies/
 Description: Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons. <a href="themes.php?page=speedy-smilies/admin.php">Configure Speedy Smilies</a>
 Author: Nick Venturella
-Version: 16
+Version: 17
 Author URI: http://quietmint.com/
 
 Speedy Smilies
@@ -27,6 +27,9 @@ along with Speedy Smilies.  If not, see <http://www.gnu.org/licenses/>.
 
 global $q_smilies_set, $q_smilies_src, $q_smilies_width, $q_smilies_height, $q_smilies_positions, $q_smilies_search, $q_smilies_replace;
 $q_smilies_set = get_option('speedy_smilies_set');
+
+// Don't load the plugin if we're previewing a theme in Theme Customizer (WordPress 3.4)
+if(array_key_exists('wp_customize', $_REQUEST)) return;
 
 require_once('functions.php');
 

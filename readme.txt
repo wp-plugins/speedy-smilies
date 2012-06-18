@@ -3,8 +3,8 @@ Contributors: quietmint
 Donate link: http://quietmint.com/speedy-smilies/
 Tags: smilies, smilie, smiles, smile, emoticons, emoticon, emotes, emote, css, css sprite, css sprites, css image sprite, css image sprites, image sprite, image sprites, css minification, css compression, css optimization
 Requires at least: 3.0
-Tested up to: 3.2.1
-Stable tag: 16
+Tested up to: 3.4
+Stable tag: 17
 
 Speeds up and beautifies your blog by substituting the individually-wrapped WordPress smilies with a single CSS image sprite containing all emoticons.
 
@@ -37,6 +37,9 @@ As of Release 9, smiley sets are modular so you can add your own set of emoticon
 At this time, there's no automated way to create the necessary PNG image and PHP file required for a smiley set, so your best bet is to learn by example. Let me know if a guided wizard to create new smiley sets is a feature that you'd like to see added in the future.
 
 == Changelog ==
+
+= Release 17 (6/17/2012) =
+* Bug fix: Speedy Smilies no longer interferes with the Theme Customizer live preview feature introduced in WordPress 3.4
 
 = Release 16 (7/30/2011) =
 * Reduced memory usage
